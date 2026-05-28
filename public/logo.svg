@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <!-- Premium Gradient Background -->
+    <linearGradient id="bubbleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#818cf8" />
+      <stop offset="100%" stop-color="#6366f1" />
+    </linearGradient>
+    
+    <!-- Atmospheric Outer Glow -->
+    <filter id="outerGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="15" flood-color="#6366f1" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <!-- Clean rounded box container -->
+  <rect width="180" height="180" x="10" y="10" rx="42" fill="#09090b" stroke="#1f1f23" stroke-width="1.5" filter="url(#outerGlow)" />
+
+  <!-- The stylized double-feedback loop bubble graphic -->
+  <g transform="translate(10, 10)">
+    <!-- Base large speech card -->
+    <rect width="90" height="64" x="45" y="48" rx="16" fill="url(#bubbleGrad)" />
+    <!-- Speech card pointer -->
+    <path d="M 100 112 L 80 128 L 86 112 Z" fill="#6366f1" />
+    
+    <!-- Secondary overlapping glassmorphic bubble -->
+    <rect width="64" height="46" x="80" y="74" rx="12" fill="rgba(255, 255, 255, 0.08)" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1.5" />
+    <!-- Overlapping pointer -->
+    <path d="M 120 120 L 130 130 L 126 120 Z" fill="rgba(255, 255, 255, 0.08)" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1.5" />
+
+    <!-- Sleek inner flow loops representing client-to-developer synchronizations -->
+    <path d="M 65 72 L 115 72" stroke="#ffffff" stroke-width="3" stroke-linecap="round" />
+    <path d="M 65 88 L 95 88" stroke="#ffffff" stroke-dasharray="1 5" stroke-width="3" stroke-linecap="round" opacity="0.8" />
+  </g>
+</svg>

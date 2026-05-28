@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Awesome SaaS Inc - Test Site</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            line-height: 1.6;
+            padding: 40px;
+            background: #fafafa;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        h1 { color: #111; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Awesome SaaS Inc.</h1>
+        <p>This is a simulated customer website. Imagine this is a B2B SaaS dashboard that your client runs.</p>
+        <p>They have pasted the widget script snippet into their HTML.</p>
+        <p>Look at the bottom right of the screen! The <strong>FeedbackFlow Widget</strong> is rendering securely using Shadow DOM, allowing users of "Awesome SaaS Inc" to submit feedback directly into your database.</p>
+    </div>
+
+    <!-- Configure User Identification API (automatically attributes feedback and hides fields) -->
+    <script>
+        window.FeedbackFlow = {
+            email: "sarah.k@designco.com",
+            name: "Sarah Jenkins"
+        };
+    </script>
+    <script src="/widget.js" data-project-key="web-app-key-2026"></script>
+</body>
+</html>

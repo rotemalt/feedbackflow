@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FeedbackFlow Developer Hub & Interactive Documentation</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Developer portal custom styling overrides - Sleek, Tight, High-Density Stripe Style */
+        #dev-portal-layout {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            min-height: 100vh;
+            background: #09090b;
+            color: var(--text-primary);
+        }
+        
+        .dev-sidebar {
+            background: rgba(10, 10, 12, 0.98);
+            border-right: 1px solid var(--border-subtle);
+            padding: 1.5rem 1rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            z-index: 100;
+        }
+
+        .dev-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: #ffffff;
+            padding-left: 4px;
+        }
+
+        .dev-logo-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--accent), #818cf8);
+            border-radius: 6px;
+            position: relative;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.25);
+        }
+
+        .dev-logo-icon::after {
+            content: '';
+            position: absolute;
+            top: 7px;
+            left: 7px;
+            width: 14px;
+            height: 14px;
+            border-left: 2.5px solid #ffffff;
+            border-bottom: 2.5px solid #ffffff;
+            transform: rotate(-45deg);
+        }
+
+        .dev-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .dev-nav-item {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 8px 10px;
+            border-radius: 6px;
+            text-align: left;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dev-nav-item:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .dev-nav-item.active {
+            color: #ffffff;
+            background: rgba(99, 102, 241, 0.06);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.03);
+        }
+
+        .dev-main-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            min-height: 100vh;
+        }
+
+        @media (max-width: 1200px) {
+            .dev-main-grid {
+                grid-template-columns: 1fr;
+            }
+            .interactive-column {
+                position: static !important;
+                height: auto !important;
+                border-left: none !important;
+                border-top: 1px solid var(--border-subtle);
+                padding: 1.5rem !important;
+            }
+        }
+
+        .docs-column {
+            padding: 2rem 2.5rem;
+            overflow-y: auto;
+            max-width: 800px;
+        }
+
+        .interactive-column {
+            background: rgba(10, 10, 14, 0.6);
+            border-left: 1px solid var(--border-subtle);
+            padding: 2rem 1.75rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .dev-section {
+            display: none;
+            opacity: 0;
+            transform: translateY(6px);
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .dev-section.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* High-Density Card & Typography */
+        .docs-card {
+            background: rgba(20, 20, 25, 0.35);
+            border: 1px solid var(--border-subtle);
+            padding: 1.25rem 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.025em;
+            margin-bottom: 0.25rem;
+        }
+
+        h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        }
+
+        h4 {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.4rem;
+        }
+
+        .subtitle {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
+
+        p, li {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .docs-card p {
+            margin-bottom: 0.75rem;
+        }
+
+        .api-method-badge {
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            margin-right: 10px;
+            letter-spacing: 0.03em;
+        }
+        .api-method-badge.get { color: #3b82f6; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.12); }
+        .api-method-badge.post { color: #10b981; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.12); }
+        .api-method-badge.put { color: #f59e0b; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.12); }
+        .api-method-badge.delete { color: #ef4444; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.12); }
+
+        .api-route {
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #f4f4f5;
+        }
+
+        .code-snippet-tabs {
+            display: flex;
+            gap: 2px;
+            border-bottom: 1px solid var(--border-subtle);
+            margin-bottom: 0.75rem;
+        }
+
+        .snippet-tab-btn {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-secondary);
+            font-family: var(--font-sans);
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 6px 10px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .snippet-tab-btn:hover {
+            color: #ffffff;
+        }
+
+        .snippet-tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        /* Playground High-Density Console */
+        .glass-console {
+            background: #040406;
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        .console-header {
+            background: #09090c;
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .console-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .console-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        .console-dot.red { background: #ef4444; }
+        .console-dot.yellow { background: #f59e0b; }
+        .console-dot.green { background: #10b981; }
+
+        .console-title {
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .console-body {
+            padding: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            line-height: 1.45;
+            color: #34d399;
+            overflow-y: auto;
+            flex: 1;
+            max-height: 220px;
+        }
+
+        /* Sandbox Interactive Styling (High Density) */
+        .sandbox-header {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sandbox-controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 0.75rem;
+        }
+
+        /* Inputs customized for compact layout */
+        .glass-input {
+            height: 32px !important;
+            padding: 4px 10px !important;
+            font-size: 0.78rem !important;
+            border-radius: 6px !important;
+            border: 1px solid var(--border-subtle) !important;
+            background: rgba(255, 255, 255, 0.02) !important;
+        }
+
+        .glass-input:focus {
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15) !important;
+        }
+
+        label {
+            font-size: 0.7rem !important;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .mock-widget-container {
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.15);
+            position: relative;
+            min-height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .sandbox-widget-mock {
+            width: 100%;
+            max-width: 270px;
+            background: #09090b;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            font-family: var(--font-sans);
+        }
+
+        .sandbox-widget-head {
+            padding: 10px 12px;
+            background: var(--accent);
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .sandbox-widget-nav {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background: #050507;
+        }
+
+        .sandbox-widget-nav-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 8px 2px;
+            cursor: pointer;
+            text-align: center;
+            border-bottom: 2px solid transparent;
+            font-family: inherit;
+        }
+
+        .sandbox-widget-nav-btn.active {
+            color: #ffffff;
+            border-bottom-color: var(--accent);
+        }
+
+        .sandbox-widget-body {
+            padding: 10px;
+            height: 180px;
+            overflow-y: auto;
+            background: #09090b;
+        }
+
+        .sandbox-widget-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .sandbox-widget-card-votes {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: #ffffff;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 28px;
+        }
+
+        .sandbox-widget-card-votes:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .sandbox-widget-submit-form {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        /* API Playground controls */
+        .api-playground-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .api-param-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .api-param-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .api-url-preview {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .hacker-log-line {
+            margin-bottom: 4px;
+            color: #34d399;
+            font-size: 0.72rem;
+        }
+        .hacker-log-line.cmd { color: #f4f4f5; }
+        .hacker-log-line.info { color: #818cf8; }
+        .hacker-log-line.success { color: #34d399; }
+    </style>
+</head>
+<body>
+    
+    <div class="background-effects"></div>
+
+    <div id="dev-portal-layout">
+        
+        <!-- Dev Sidebar -->
+        <aside class="dev-sidebar">
+            <div class="dev-logo">
+                <div class="dev-logo-icon"></div>
+                <span>FeedbackFlow</span>
+            </div>
+            
+            <nav class="dev-nav">
+                <button class="dev-nav-item active" data-target="sec-intro">
+                    <span>🚀</span> Introduction
+                </button>
+                <button class="dev-nav-item" data-target="sec-widget">
+                    <span>🎨</span> Widget Embedding
+                </button>
+                <button class="dev-nav-item" data-target="sec-user-api">
+                    <span>🔐</span> User Identification API
+                </button>
+                <button class="dev-nav-item" data-target="sec-rest-api">
+                    <span>📡</span> REST API Playground
+                </button>
+                <button class="dev-nav-item" data-target="sec-docker">
+                    <span>🐳</span> Docker Self-Hosting
+                </button>
+            </nav>
+
+            <div style="margin-top: auto; border-top: 1px solid var(--border-subtle); padding-top: 1rem;">
+                <a href="/" style="text-decoration: none; color: var(--text-secondary); font-size: 0.8rem; font-weight: 700; transition: color 0.2s; display: flex; align-items: center; gap: 6px;">
+                    <span>←</span> Back to Console
+                </a>
+            </div>
+        </aside>
+
+        <!-- Dev Main Viewport Grid -->
+        <div class="dev-main-grid">
+            
+            <!-- Docs Column (Left) -->
+            <main class="docs-column">
+                
+                <!-- Section 1: Introduction -->
+                <section id="sec-intro" class="dev-section active">
+                    <div class="pane-header" style="margin-bottom: 1.5rem;">
+                        <h2>Developer Introduction</h2>
+                        <p class="subtitle">Architectural design patterns and low-overhead COSS architecture</p>
+                    </div>
+
+                    <div class="docs-card">
+                        <h3 style="margin-bottom: 0.5rem;">Welcome to FeedbackFlow</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 0.75rem;">
+                            FeedbackFlow is a high-performance, open-source alternative to expensive customer feedback widgets and roadmap platforms. 
+                            Instead of relying on heavy pre-compilers or large enterprise stacks, FeedbackFlow adopts a **Zero-Bloat Product Architecture**:
+                        </p>
+                        
+                        <ul style="padding-left: 1.25rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; margin-bottom: 0.5rem;">
+                            <li><strong>Zero-Dependency Core</strong>: Runs with just standard Express, SQLite3, CORS, and JWT signatures. Persists into a single local database file.</li>
+                            <li><strong>Permissive Dual Licensing</strong>: The administrative dashboard console is licensed under GNU AGPLv3, while the floating injection client widget is 100% MIT, letting you inject it into proprietary, closed-source SaaS products without copyleft risks.</li>
+                            <li><strong>Shadow-DOM Styling Isolation</strong>: Leveraging Shadow-DOM isolation inside <code>widget.js</code> guarantees that parent CSS rules do not break the widget structure, nor do the widget's themes bleed into your product.</li>
+                        </ul>
+                    </div>
+
+                    <div class="docs-card">
+                        <h3 style="margin-bottom: 0.5rem;">Workspace Codebase Map</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 0.75rem;">
+                            A single, clean directory layout makes it simple to deploy, seed, and manage:
+                        </p>
+                        <pre class="code-block" style="font-size: 0.78rem; line-height: 1.45; background: #030303; border-color: rgba(255,255,255,0.06); padding: 1rem; border-radius: 8px; font-family: var(--font-mono);"><code>feedbackflow/
+├── server.js            # Express API Server & Routing
+├── database.js          # SQLite Schema & PBKDF2 Hashing
+├── docker-compose.yml   # Zero-Config Production Container
+├── package.json         # Lightweight NPM dependencies
+└── public/              # Static Frontend Assets
+    ├── index.html       # Admin Dashboard Console Layout
+    ├── app.js           # OOP Admin Component Controller Core
+    ├── widget.js        # Isolated Shadow-DOM Client Widget
+    └── developer-portal.html # Stripe-style interactive portal (this hub)</code></pre>
+                    </div>
+                </section>
+
+                <!-- Section 2: Widget Embedding -->
+                <section id="sec-widget" class="dev-section">
+                    <div class="pane-header" style="margin-bottom: 1.5rem;">
+                        <h2>Widget Embedding Guide</h2>
+                        <p class="subtitle">Visual configuration playground and automatic script generators</p>
+                    </div>
+
+                    <div class="docs-card">
+                        <h3 style="margin-bottom: 0.5rem;">Embedding Script</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                            To embed the FeedbackFlow board inside any client page, simply copy and paste the compiled script block before the closing <code>&lt;/body&gt;</code> tag of your HTML. 
+                            Use the **Live Visual Customizer Sandbox** in the right-hand panel to play with themes, customize titles, and see the sandbox widget render in real-time.
+                        </p>
+
+                        <div class="code-snippet-tabs">
+                            <button class="snippet-tab-btn active" onclick="switchSnippet(event, 'snip-html')">Vanilla HTML</button>
+                            <button class="snippet-tab-btn" onclick="switchSnippet(event, 'snip-react')">React / Next.js</button>
+                            <button class="snippet-tab-btn" onclick="switchSnippet(event, 'snip-vue')">Vue 3</button>
+                        </div>
+
+                        <!-- Vanilla HTML -->
+                        <div id="snip-html" class="snippet-block" style="display: block;">
+                            <pre class="code-block" style="font-size:0.75rem; background:#030303; padding:0.75rem; border-radius:8px; font-family:var(--font-mono);"><code id="code-snippet-html">&lt;!-- Embed Floating Widget --&gt;
+&lt;script src="http://localhost:4000/widget.js" data-project-key="web-app-key"&gt;&lt;/script&gt;</code></pre>
+                        </div>
+
+                        <!-- React -->
+                        <div id="snip-react" class="snippet-block" style="display: none;">
+                            <pre class="code-block" style="font-size:0.75rem; background:#030303; padding:0.75rem; border-radius:8px; font-family:var(--font-mono);"><code>import Script from 'next/script';
+
+export default function AppLayout({ children }) {
+  return (
+    &lt;&gt;
+      {children}
+      &lt;Script 
+        src="http://localhost:4000/widget.js" 
+        data-project-key="web-app-key"
+        strategy="lazyOnload"
+      /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+                        </div>
+
+                        <!-- Vue -->
+                        <div id="snip-vue" class="snippet-block" style="display: none;">
+                            <pre class="code-block" style="font-size:0.75rem; background:#030303; padding:0.75rem; border-radius:8px; font-family:var(--font-mono);"><code>&lt;!-- Vue Component --&gt;
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;router-view /&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  mounted() {
+    const script = document.createElement('script');
+    script.src = "http://localhost:4000/widget.js";
+    script.setAttribute('data-project-key', 'web-app-key');
+    document.body.appendChild(script);
+  }
+}
+&lt;/script&gt;</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="docs-card" style="margin-top: 1.5rem;">
+                        <h3 style="margin-bottom: 0.5rem;">Option 2: Standalone Shareable Portal (Zero-Code)</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                            If you do not have a website to embed the widget in, FeedbackFlow serves a stunning standalone, customer-facing public feedback webpage board! 
+                            Simply share your project's unique URL directly with your users to gather feedback, handle threaded comments, and publish release roadmaps:
+                        </p>
+                        <pre class="code-block" style="font-size:0.75rem; background:#030303; padding:0.75rem; border-radius:8px; font-family:var(--font-mono);"><code id="code-snippet-portal-link">http://localhost:4000/portal.html?key=web-app-key-2026</code></pre>
+                        <button class="btn-primary" onclick="window.open(document.getElementById('code-snippet-portal-link').textContent, '_blank')" style="margin-top: 0.75rem; font-size: 0.78rem; padding: 6px 12px; font-weight: 700; border-radius: 6px; cursor: pointer;">🔗 Launch Live Shareable Portal Page</button>
+                    </div>
+                </section>
+
+                <!-- Section 3: User Identification API -->
+                <section id="sec-user-api" class="dev-section">
+                    <div class="pane-header" style="margin-bottom: 1.5rem;">
+                        <h2>User Identification API</h2>
+                        <p class="subtitle">Sync verified, signed-in user profiles directly into the widget context</p>
+                    </div>
+
+                    <div class="docs-card">
+                        <h3 style="margin-bottom: 0.5rem;">Bypassing Anonymity</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 0.75rem;">
+                            By default, users submit feedback anonymously or input their names manually. 
+                            However, if a customer is already signed into your SaaS platform, you can pass their verified credentials directly to the widget.
+                        </p>
+                        <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">
+                            This **automatically attributes incoming requests to their account, logs them in our database, and completely hides the Name and Email forms** inside the client widget panel!
+                        </p>
+                    </div>
+
+                    <div class="docs-card">
+                        <h3 style="margin-bottom: 0.5rem;">Defining Context</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 0.75rem; font-size: 0.85rem;">
+                            Simply define the <code>window.FeedbackFlow</code> global object on your parent page <strong>before</strong> loading the widget script:
+                        </p>
+                        
+                        <pre class="code-block" style="font-size:0.75rem; background:#030303; padding:1rem; border-radius:8px; font-family:var(--font-mono); line-height:1.45;"><code>&lt;script&gt;
+    window.FeedbackFlow = {
+        email: "sarah.jenkins@designco.com",
+        name: "Sarah Jenkins"
+    };
+&lt;/script&gt;
+&lt;script src="http://localhost:4000/widget.js" data-project-key="web-app-key"&gt;&lt;/script&gt;</code></pre>
+                        
+                        <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.82rem;">
+                            Use the visual toggles in the **Sandbox panel (right)** to enable User pre-fill and see the widget hide forms and auto-prefill titles instantly!
+                        </p>
+                    </div>
+                </section>
+
+                <!-- Section 4: REST API Playground -->
+                <section id="sec-rest-api" class="dev-section">
+                    <div class="pane-header" style="margin-bottom: 1.5rem;">
+                        <h2>REST API Blueprint Reference</h2>
+                        <p class="subtitle">Complete backend API models with interactive, live-fetching REST Client</p>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <!-- Route 1 -->
+                        <div class="docs-card" style="cursor: pointer; margin-bottom:0; padding: 1rem;" onclick="selectApiPlayground('GET', '/api/widget-config', { apiKey: 'web-app-key-2026' })">
+                            <div style="display:flex; align-items:center; margin-bottom:0.5rem;">
+                                <span class="api-method-badge get">GET</span>
+                                <span class="api-route">/api/widget-config?apiKey=YOUR_API_KEY</span>
+                            </div>
+                            <p style="color:var(--text-secondary); font-size:0.8rem; margin:0;">
+                                Retrieves workspace branding configurations (theme color, welcome title). Triggered on widget boot.
+                            </p>
+                        </div>
+
+                        <!-- Route 2 -->
+                        <div class="docs-card" style="cursor: pointer; margin-bottom:0; padding: 1rem;" onclick="selectApiPlayground('GET', '/api/feedback', { projectId: '1' })">
+                            <div style="display:flex; align-items:center; margin-bottom:0.5rem;">
+                                <span class="api-method-badge get">GET</span>
+                                <span class="api-route">/api/feedback?projectId=ID</span>
+                            </div>
+                            <p style="color:var(--text-secondary); font-size:0.8rem; margin:0;">
+                                Retrieves existing feedback cards for a project, sorted by vote counts. Renders the public boards.
+                            </p>
+                        </div>
+
+                        <!-- Route 3 -->
+                        <div class="docs-card" style="cursor: pointer; margin-bottom:0; padding: 1rem;" onclick="selectApiPlayground('POST', '/api/feedback', { project_id: '1', title: 'Need dark mode', description: 'The current dashboard is too bright at night.', category: 'improvement', user_email: 'sarah@designco.com', user_name: 'Sarah Jenkins' })">
+                            <div style="display:flex; align-items:center; margin-bottom:0.5rem;">
+                                <span class="api-method-badge post">POST</span>
+                                <span class="api-route">/api/feedback</span>
+                            </div>
+                            <p style="color:var(--text-secondary); font-size:0.8rem; margin:0;">
+                                Submits a new customer feedback card. AI Agents process this dynamically.
+                            </p>
+                        </div>
+
+                        <!-- Route 4 -->
+                        <div class="docs-card" style="cursor: pointer; margin-bottom:0; padding: 1rem;" onclick="selectApiPlayground('GET', '/api/feedback/1/comments', {})">
+                            <div style="display:flex; align-items:center; margin-bottom:0.5rem;">
+                                <span class="api-method-badge get">GET</span>
+                                <span class="api-route">/api/feedback/:id/comments</span>
+                            </div>
+                            <p style="color:var(--text-secondary); font-size:0.8rem; margin:0;">
+                                Retrieves discussion comment threads for a specific feedback ticket.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 5: Docker Self-Hosting -->
+                <section id="sec-docker" class="dev-section">
+                    <div class="pane-header" style="margin-bottom: 1.5rem;">
+                        <h2>Docker Production Deploy</h2>
+                        <p class="subtitle">Deploy the complete B2B SaaS service suite in under 5 seconds</p>
+                    </div>
+
+                    <div class="docs-card">
+                        <h3 style="margin-bottom: 0.5rem;">docker-compose.yml</h3>
+                        <p style="color:var(--text-secondary); font-size:0.85rem; margin-bottom:0.75rem;">
+                            Deploy on your server with persistent SQLite volumes, custom ports, and dynamic JWT secrets:
+                        </p>
+
+                        <pre class="code-block" style="font-size:0.75rem; background:#030303; padding:1rem; border-radius:8px; font-family:var(--font-mono); line-height:1.45;"><code>version: '3.8'
+
+services:
+  feedbackflow:
+    container_name: feedbackflow
+    image: node:18-alpine
+    working_dir: /usr/src/app
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - NODE_ENV=production
+      - JWT_SECRET=change-this-to-a-secure-key-in-production
+      - GEMINI_API_KEY=YOUR_GOOGLE_GEMINI_KEY
+    command: sh -c "npm install && npm start"
+    restart: unless-stopped</code></pre>
+                    </div>
+
+                    <div class="docs-card">
+                        <h3 style="margin-bottom: 0.5rem;">Launch Command</h3>
+                        <pre class="code-block" style="font-size:0.78rem; background:#030303; padding:0.75rem; border-radius:8px; font-family:var(--font-mono);"><code># Startup containers
+docker compose up -d
+
+# Inspect startup database migrations and logs
+docker compose logs -f</code></pre>
+                    </div>
+                </section>
+
+            </main>
+
+            <!-- Interactive Column (Right) -->
+            <section class="interactive-column">
+                
+                <!-- Sandbox: Hacker Console (Shown for Intro, Docker) -->
+                <div id="panel-hacker" class="playground-panel" style="display: flex; flex-direction: column; height: 100%;">
+                    <div class="sandbox-header">🚀 Monorepo System Logs</div>
+                    <div class="glass-console">
+                        <div class="console-header">
+                            <div class="console-dots">
+                                <div class="console-dot red"></div>
+                                <div class="console-dot yellow"></div>
+                                <div class="console-dot green"></div>
+                            </div>
+                            <div class="console-title">Local Terminal</div>
+                        </div>
+                        <div class="console-body" id="hacker-terminal">
+                            <div class="hacker-log-line cmd">$ feedbackflow-coss --status</div>
+                            <div class="hacker-log-line success">[SUCCESS] SQLite schemas initialized. feedback.db open.</div>
+                            <div class="hacker-log-line info">[INFO] Registered 3 relational tables (projects, feedback, comments).</div>
+                            <div class="hacker-log-line info">[INFO] Executed native PBKDF2 secure password cryptographic salts.</div>
+                            <div class="hacker-log-line info">[INFO] Express backend running locally: http://localhost:4000</div>
+                            <div class="hacker-log-line success">[AI] Gemini triaging fallback engine activated. Ready.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sandbox: Live Widget Sandbox (Shown for Widget, User API) -->
+                <div id="panel-widget-sandbox" class="playground-panel" style="display: none; flex-direction: column; gap: 0.75rem;">
+                    <div class="sandbox-header">🎨 Live Widget Embed Sandbox</div>
+                    
+                    <div class="glass-panel" style="padding: 0.85rem 1rem;">
+                        <div class="sandbox-controls-grid">
+                            <div class="form-group">
+                                <label>Widget Theme Color</label>
+                                <input type="color" id="sb-color" class="glass-input" value="#6366f1" style="height:32px; padding:2px; cursor:pointer; width:100%; border:none;" onchange="updateSandboxWidget()">
+                            </div>
+                            <div class="form-group">
+                                <label>Welcome Title</label>
+                                <input type="text" id="sb-title" class="glass-input" value="Feature Board" style="width:100%;" oninput="updateSandboxWidget()">
+                            </div>
+                        </div>
+                        <div style="border-top:1px solid var(--border-subtle); margin-top:6px; padding-top:6px;">
+                            <label style="display:flex; align-items:center; gap:6px; font-size:0.75rem; font-weight:600; cursor:pointer; margin:0;">
+                                <input type="checkbox" id="sb-user-ident" onchange="toggleUserIdentField()">
+                                Enable User Identification API
+                            </label>
+                        </div>
+                        <div id="sb-user-fields" style="display:none; grid-template-columns: 1fr 1fr; gap: 8px; margin-top:8px; border-left:2px solid var(--accent); padding-left:8px;">
+                            <div class="form-group">
+                                <label>Verified Name</label>
+                                <input type="text" id="sb-user-name" class="glass-input" value="Sarah Jenkins" style="width:100%;" oninput="updateSandboxWidget()">
+                            </div>
+                            <div class="form-group">
+                                <label>Verified Email</label>
+                                <input type="email" id="sb-user-email" class="glass-input" value="sarah@designco.com" style="width:100%;" oninput="updateSandboxWidget()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mock-widget-container">
+                        <!-- Embedded Widget Mockup -->
+                        <div class="sandbox-widget-mock" id="sandbox-widget-el">
+                            <div class="sandbox-widget-head" id="sb-w-head">
+                                <span style="font-size:0.6rem; text-transform:uppercase; font-weight:700; opacity:0.8; letter-spacing:0.02em;">FeedbackFlow</span>
+                                <h4 id="sb-w-title" style="margin:0; font-size:0.95rem; font-weight:800; letter-spacing:-0.02em;">Feature Board</h4>
+                            </div>
+                            <div class="sandbox-widget-nav">
+                                <button class="sandbox-widget-nav-btn active" id="sb-tab-board" onclick="switchSandboxTab('board')">Board</button>
+                                <button class="sandbox-widget-nav-btn" id="sb-tab-submit" onclick="switchSandboxTab('submit')">Submit</button>
+                                <button class="sandbox-widget-nav-btn" id="sb-tab-roadmap" onclick="switchSandboxTab('roadmap')">Roadmap</button>
+                            </div>
+                            
+                            <div class="sandbox-widget-body" id="sb-w-body">
+                                <!-- Dynamic Tab Contents -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sandbox: REST API playground (Shown for REST API) -->
+                <div id="panel-api-playground" class="playground-panel" style="display: none; flex-direction: column; gap: 0.75rem;">
+                    <div class="sandbox-header">📡 Live REST API Playground</div>
+                    
+                    <div class="glass-panel" style="padding: 1rem;">
+                        <div class="api-playground-controls" id="api-playground-inputs">
+                            <!-- Parameters will populate here dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="api-url-preview">
+                        <span id="api-endpoint-text" style="word-break: break-all; font-size: 0.72rem;">GET /api/feedback?projectId=1</span>
+                        <button class="btn-primary" id="btn-api-send" style="padding: 4px 10px; font-size: 0.75rem; font-weight: 700; border-radius:6px; flex-shrink: 0;" onclick="triggerPlaygroundFetch()">Send Request</button>
+                    </div>
+
+                    <div class="glass-console" style="min-height: 220px;">
+                        <div class="console-header">
+                            <div class="console-dots">
+                                <div class="console-dot red"></div>
+                                <div class="console-dot yellow"></div>
+                                <div class="console-dot green"></div>
+                            </div>
+                            <div class="console-title" id="api-status-text">Response Status: -</div>
+                        </div>
+                        <pre class="console-body" id="api-response-body" style="margin: 0; color: #60a5fa; font-size: 0.72rem; text-align: left; overflow-x: auto; white-space: pre-wrap;">Select a REST API endpoint from the left to test it interactively...</pre>
+                    </div>
+                </div>
+
+            </section>
+
+        </div>
+    </div>
+
+    <script>
+        // Tab switching controller
+        const navItems = document.querySelectorAll('.dev-nav-item');
+        const sections = document.querySelectorAll('.dev-section');
+        const panels = document.querySelectorAll('.playground-panel');
+        
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                navItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                
+                const target = item.dataset.target;
+                sections.forEach(sec => {
+                    sec.classList.remove('active');
+                    if (sec.id === target) {
+                        sec.classList.add('active');
+                    }
+                });
+
+                // Update right hand panel
+                panels.forEach(p => p.style.display = 'none');
+                
+                if (target === 'sec-intro' || target === 'sec-docker') {
+                    document.getElementById('panel-hacker').style.display = 'flex';
+                } else if (target === 'sec-widget' || target === 'sec-user-api') {
+                    document.getElementById('panel-widget-sandbox').style.display = 'flex';
+                    updateSandboxWidget();
+                } else if (target === 'sec-rest-api') {
+                    document.getElementById('panel-api-playground').style.display = 'flex';
+                    // Load default API endpoint playground
+                    selectApiPlayground('GET', '/api/feedback', { projectId: '1' });
+                }
+            });
+        });
+
+        // Mock Terminal line injection
+        const terminal = document.getElementById('hacker-terminal');
+        const logMessages = [
+            "[INFO] Checking local SQLite integration...",
+            "[SUCCESS] database.db holds 12 persistent client records.",
+            "[INFO] Submitter Identification Hooks ready.",
+            "[INFO] Synced status: Planned -> Synced to GitHub Issues.",
+            "[INFO] Loaded customized brand colors automatically."
+        ];
+        
+        let logIndex = 0;
+        setInterval(() => {
+            if (terminal) {
+                const line = document.createElement('div');
+                line.className = 'hacker-log-line info';
+                line.textContent = logMessages[logIndex % logMessages.length];
+                terminal.appendChild(line);
+                terminal.scrollTop = terminal.scrollHeight;
+                logIndex++;
+            }
+        }, 6000);
+
+        // Code Snippet Tabs Switching
+        function switchSnippet(event, tabId) {
+            const container = event.target.closest('.docs-card');
+            container.querySelectorAll('.snippet-tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            container.querySelectorAll('.snippet-block').forEach(block => block.style.display = 'none');
+            document.getElementById(tabId).style.display = 'block';
+        }
+
+        // --- Sandbox Live Widget Preview Controller ---
+        let currentSandboxTab = 'board';
+        let mockFeedbacks = [];
+
+        function toggleUserIdentField() {
+            const chk = document.getElementById('sb-user-ident');
+            const fields = document.getElementById('sb-user-fields');
+            fields.style.display = chk.checked ? 'grid' : 'none';
+            updateSandboxWidget();
+        }
+
+        async function fetchSandboxData() {
+            try {
+                const res = await fetch('/api/feedback?projectId=1');
+                if (res.ok) {
+                    mockFeedbacks = await res.json();
+                }
+            } catch(e) {
+                // Heuristic Fallback
+                mockFeedbacks = [
+                    { id: 101, title: 'Mock: Add custom dashboard filters', votes: 8, category: 'feature', status: 'planned' },
+                    { id: 102, title: 'Mock: App crashes when editing color picker', votes: 14, category: 'bug', status: 'in-progress' },
+                    { id: 103, title: 'Mock: Inline CSS styling bleed overrides', votes: 3, category: 'improvement', status: 'none' }
+                ];
+            }
+        }
+
+        async function updateSandboxWidget() {
+            const color = document.getElementById('sb-color').value;
+            const title = document.getElementById('sb-title').value || 'Feature Board';
+            
+            // Apply customized color to sandbox widget
+            document.getElementById('sb-w-head').style.backgroundColor = color;
+            document.getElementById('sb-w-title').textContent = title;
+            document.documentElement.style.setProperty('--accent', color);
+
+            // Fetch live data once
+            if (mockFeedbacks.length === 0) {
+                await fetchSandboxData();
+            }
+
+            renderSandboxTabContent();
+            updateSnippetCode();
+        }
+
+        function switchSandboxTab(tab) {
+            currentSandboxTab = tab;
+            document.querySelectorAll('.sandbox-widget-nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`sb-tab-${tab}`).classList.add('active');
+            renderSandboxTabContent();
+        }
+
+        function renderSandboxTabContent() {
+            const body = document.getElementById('sb-w-body');
+            body.innerHTML = '';
+
+            if (currentSandboxTab === 'board') {
+                if (mockFeedbacks.length === 0) {
+                    body.innerHTML = '<div style="color:var(--text-secondary); text-align:center; font-size:0.75rem; padding-top:40px;">No cards found</div>';
+                    return;
+                }
+                
+                mockFeedbacks.forEach(f => {
+                    const card = document.createElement('div');
+                    card.className = 'sandbox-widget-card';
+                    card.innerHTML = `
+                        <div style="flex:1; min-width: 0;">
+                            <div style="font-size:0.75rem; font-weight:600; color:#fff; line-height:1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${f.title}</div>
+                            <span style="font-size:0.6rem; color:var(--text-secondary); text-transform:uppercase; font-weight:700;">${f.category}</span>
+                        </div>
+                        <div class="sandbox-widget-card-votes" onclick="sandboxVote(${f.id}, this)">
+                            <span style="font-size: 0.6rem; line-height: 1;">▲</span>
+                            <span>${f.votes}</span>
+                        </div>
+                    `;
+                    body.appendChild(card);
+                });
+            } else if (currentSandboxTab === 'submit') {
+                const userIdent = document.getElementById('sb-user-ident').checked;
+                const email = document.getElementById('sb-user-email').value;
+                const name = document.getElementById('sb-user-name').value;
+
+                body.innerHTML = `
+                    <form class="sandbox-widget-submit-form" onsubmit="sandboxSubmitFeedback(event)">
+                        <input type="text" id="sb-form-title" class="glass-input" placeholder="Title of suggestion..." required style="padding: 4px 8px; font-size:0.75rem; height: 28px;">
+                        <textarea id="sb-form-desc" class="glass-input" placeholder="Detailed explanation..." required style="padding: 4px 8px; font-size:0.75rem; height:40px; resize:none;"></textarea>
+                        
+                        <div style="display: ${userIdent ? 'none' : 'grid'}; grid-template-columns:1fr 1fr; gap:6px;">
+                            <input type="text" id="sb-form-name" class="glass-input" placeholder="Name" style="padding:4px 8px; font-size:0.72rem; height: 28px;">
+                            <input type="email" id="sb-form-email" class="glass-input" placeholder="Email" style="padding:4px 8px; font-size:0.72rem; height: 28px;">
+                        </div>
+
+                        ${userIdent ? `<div style="font-size:0.68rem; color:#34d399; font-weight:600; line-height: 1.2;">✓ Submitting as ${name}</div>` : ''}
+
+                        <button class="btn-primary" type="submit" style="padding:6px; font-size:0.75rem; font-weight:700; width:100%; border-radius:6px;">Submit</button>
+                    </form>
+                `;
+            } else if (currentSandboxTab === 'roadmap') {
+                // Planned, In-Progress, Completed Mock Columns
+                const planCards = mockFeedbacks.filter(f => f.status === 'planned');
+                const progCards = mockFeedbacks.filter(f => f.status === 'in-progress' || f.status === 'progress');
+
+                body.innerHTML = `
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <div>
+                            <div style="font-size:0.65rem; font-weight:700; color:#60a5fa; text-transform:uppercase; margin-bottom:2px;">Planned (${planCards.length})</div>
+                            ${planCards.slice(0, 2).map(c => `<div style="font-size:0.7rem; color:#fff; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04); padding:4px 6px; border-radius:4px; margin-bottom:3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${c.title}</div>`).join('') || '<div style="font-size:0.65rem; color:var(--text-secondary);">None</div>'}
+                        </div>
+                        <div style="border-top: 1px solid rgba(255,255,255,0.04); padding-top:6px; margin-top:2px;">
+                            <div style="font-size:0.65rem; font-weight:700; color:#fbbf24; text-transform:uppercase; margin-bottom:2px;">In Progress (${progCards.length})</div>
+                            ${progCards.slice(0, 2).map(c => `<div style="font-size:0.7rem; color:#fff; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04); padding:4px 6px; border-radius:4px; margin-bottom:3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${c.title}</div>`).join('') || '<div style="font-size:0.65rem; color:var(--text-secondary);">None</div>'}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        async function sandboxVote(id, el) {
+            el.style.opacity = '0.5';
+            try {
+                const res = await fetch(`/api/feedback/${id}/vote`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'upvote' })
+                });
+                if (res.ok) {
+                    const card = mockFeedbacks.find(c => c.id === id);
+                    if (card) card.votes++;
+                    updateSandboxWidget();
+                }
+            } catch(e) {}
+        }
+
+        async function sandboxSubmitFeedback(e) {
+            e.preventDefault();
+            const userIdent = document.getElementById('sb-user-ident').checked;
+            const title = document.getElementById('sb-form-title').value;
+            const description = document.getElementById('sb-form-desc').value;
+            
+            let name = userIdent ? document.getElementById('sb-user-name').value : document.getElementById('sb-form-name').value;
+            let email = userIdent ? document.getElementById('sb-user-email').value : document.getElementById('sb-form-email').value;
+
+            const payload = {
+                project_id: 1,
+                title,
+                description,
+                category: 'feature',
+                user_name: name || 'Anonymous',
+                user_email: email || ''
+            };
+
+            const body = document.getElementById('sb-w-body');
+            body.innerHTML = '<div style="text-align:center; font-size:0.75rem; color:#fff; padding-top:40px;">Submitting...</div>';
+
+            try {
+                const res = await fetch('/api/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    const freshCard = await res.json();
+                    mockFeedbacks.unshift(freshCard); // Add to board
+                    body.innerHTML = `
+                        <div style="text-align:center; font-size:0.75rem; color:#34d399; font-weight:600; padding-top:35px;">
+                            <div style="font-size:1.2rem; margin-bottom:4px;">✓</div>
+                            Feedback Submitted!
+                        </div>
+                    `;
+                    setTimeout(() => switchSandboxTab('board'), 1200);
+                } else {
+                    body.innerHTML = '<div style="text-align:center; font-size:0.75rem; color:#f87171; padding-top:40px;">Failed. Try again.</div>';
+                    setTimeout(() => switchSandboxTab('submit'), 1800);
+                }
+            } catch(err) {
+                body.innerHTML = '<div style="text-align:center; font-size:0.75rem; color:#f87171; padding-top:40px;">Connection error.</div>';
+                setTimeout(() => switchSandboxTab('submit'), 1800);
+            }
+        }
+
+        function updateSnippetCode() {
+            const host = window.location.origin;
+            const userIdent = document.getElementById('sb-user-ident').checked;
+            const email = document.getElementById('sb-user-email').value;
+            const name = document.getElementById('sb-user-name').value;
+
+            let code = '';
+            if (userIdent) {
+                code += `&lt;script&gt;\n  window.FeedbackFlow = {\n    email: "${email}",\n    name: "${name}"\n  };\n&lt;/script&gt;\n`;
+            }
+            code += `&lt;script src="${host}/widget.js" data-project-key="web-app-key"&gt;&lt;/script&gt;`;
+            
+            document.getElementById('code-snippet-html').innerHTML = code;
+
+            // Render shareable portal URL dynamically
+            let portalLink = `${host}/portal.html?key=web-app-key-2026`;
+            if (userIdent) {
+                portalLink += `&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`;
+            }
+            const portalLinkEl = document.getElementById('code-snippet-portal-link');
+            if (portalLinkEl) {
+                portalLinkEl.textContent = portalLink;
+            }
+        }
+
+
+        // --- REST API Playground Client Controller ---
+        let currentApiMethod = 'GET';
+        let currentApiUrl = '/api/feedback';
+        let currentApiParams = {};
+
+        function selectApiPlayground(method, url, defaultParams) {
+            currentApiMethod = method;
+            currentApiUrl = url;
+            currentApiParams = defaultParams;
+
+            // Generate interface controls
+            const container = document.getElementById('api-playground-inputs');
+            container.innerHTML = `<h4 style="letter-spacing:-0.02em; margin-bottom:6px; font-size:0.82rem; color:#fff;">Query Parameters: ${method} ${url}</h4>`;
+
+            document.getElementById('api-endpoint-text').textContent = `${method} ${url}`;
+
+            // Render controls inside a clean high-density grid
+            const formGrid = document.createElement('div');
+            formGrid.className = 'sandbox-controls-grid';
+            
+            Object.entries(defaultParams).forEach(([key, val]) => {
+                const group = document.createElement('div');
+                group.className = 'api-param-group';
+                
+                let inputHtml = '';
+                if (key === 'description') {
+                    inputHtml = `<textarea id="api-val-${key}" class="glass-input" style="padding:4px 8px; font-size:0.78rem; height:32px; resize:none; width:100%;">${val}</textarea>`;
+                } else if (key === 'category') {
+                    inputHtml = `
+                        <select id="api-val-${key}" class="glass-input" style="padding:4px 8px; font-size:0.78rem; width:100%;">
+                            <option value="feature" ${val === 'feature' ? 'selected' : ''}>Feature</option>
+                            <option value="bug" ${val === 'bug' ? 'selected' : ''}>Bug</option>
+                            <option value="improvement" ${val === 'improvement' ? 'selected' : ''}>Improvement</option>
+                        </select>
+                    `;
+                } else {
+                    inputHtml = `<input type="text" id="api-val-${key}" class="glass-input" value="${val}" style="padding:4px 8px; font-size:0.78rem; width:100%;">`;
+                }
+
+                group.innerHTML = `
+                    <label class="api-param-label">${key.replace('_', ' ')}</label>
+                    ${inputHtml}
+                `;
+                formGrid.appendChild(group);
+            });
+
+            container.appendChild(formGrid);
+
+            if (Object.keys(defaultParams).length === 0) {
+                container.innerHTML += '<div style="font-size:0.78rem; color:var(--text-secondary);">No dynamic parameters required for this endpoint.</div>';
+            }
+            
+            updateApiUrlPreview();
+        }
+
+        function updateApiUrlPreview() {
+            let renderedUrl = currentApiUrl;
+            if (currentApiMethod === 'GET') {
+                const params = [];
+                Object.keys(currentApiParams).forEach(key => {
+                    const inputEl = document.getElementById(`api-val-${key}`);
+                    const val = inputEl ? inputEl.value : currentApiParams[key];
+                    params.push(`${key}=${encodeURIComponent(val)}`);
+                });
+                if (params.length > 0) {
+                    renderedUrl += `?${params.join('&')}`;
+                }
+            }
+            document.getElementById('api-endpoint-text').textContent = `${currentApiMethod} ${renderedUrl}`;
+        }
+
+        // Listener to dynamically update path previews as inputs change
+        document.getElementById('api-playground-inputs').addEventListener('input', updateApiUrlPreview);
+        document.getElementById('api-playground-inputs').addEventListener('change', updateApiUrlPreview);
+
+        async function triggerPlaygroundFetch() {
+            const btn = document.getElementById('btn-api-send');
+            const statusEl = document.getElementById('api-status-text');
+            const consoleEl = document.getElementById('api-response-body');
+
+            btn.disabled = true;
+            btn.textContent = 'Fetching...';
+            consoleEl.textContent = '// Loading API payload...';
+            statusEl.textContent = 'Status: FETCHING';
+
+            let fetchUrl = currentApiUrl;
+            let options = {
+                method: currentApiMethod,
+                headers: { 'Content-Type': 'application/json' }
+            };
+
+            // Capture parameters
+            const params = {};
+            Object.keys(currentApiParams).forEach(key => {
+                const input = document.getElementById(`api-val-${key}`);
+                params[key] = input ? input.value : currentApiParams[key];
+            });
+
+            if (currentApiMethod === 'GET') {
+                const q = new URLSearchParams(params).toString();
+                if (q) fetchUrl += `?${q}`;
+            } else if (currentApiMethod === 'POST') {
+                options.body = JSON.stringify(params);
+            }
+
+            try {
+                const res = await fetch(fetchUrl, options);
+                statusEl.textContent = `Status: ${res.status} ${res.statusText}`;
+                
+                // Colorize text based on response
+                if (res.ok) {
+                    consoleEl.style.color = '#34d399'; // Success green
+                } else {
+                    consoleEl.style.color = '#f87171'; // Error red
+                }
+
+                const data = await res.json();
+                consoleEl.textContent = JSON.stringify(data, null, 2);
+            } catch(err) {
+                statusEl.textContent = 'Status: FAILED';
+                consoleEl.style.color = '#f87171';
+                consoleEl.textContent = `// Failed to connect to server.\n// Error: ${err.message}`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Send Request';
+            }
+        }
+    </script>
+</body>
+</html>

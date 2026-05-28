@@ -1,0 +1,54 @@
+# ==============================================================================
+# FeedbackFlow: Self-Hosted Docker Compose Orchestration Setup
+# ==============================================================================
+# This configuration allows developers and indie hackers to deploy the complete 
+# FeedbackFlow core on their VPS or local environments in seconds.
+#
+# Commands:
+#   Start server:     docker compose up -d
+#   Stop server:      docker compose down
+#   Inspect logs:     docker compose logs -f
+# ==============================================================================
+
+version: '3.8'
+
+services:
+  feedbackflow:
+    container_name: feedbackflow-core
+    image: feedbackflow/core:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      # Node server configurations
+      - PORT=4000
+      - NODE_ENV=production
+      
+      # JWT Encryption key (CHANGE THIS IN SECURE PRODUCTION DEPLOYMENTS!)
+      - JWT_SECRET=super-secret-key-for-feedbackflow-2026
+      
+      # [Optional] Gemini AI Agent Integration API Key. 
+      # If provided, unlocks automatic category tagging and vague-text clarification replies.
+      # If omitted, falls back to native heuristic keyword classifiers.
+      - GEMINI_API_KEY=
+      
+      # [Optional] Port config used by script snippets in widget customizer.
+      # Useful if you run it behind a reverse proxy (Nginx, Traefik, Cloudflare).
+      - APP_PUBLIC_URL=http://localhost:4000
+      
+    volumes:
+      # Persists the SQLite database locally on the host system to prevent data loss on restarts
+      - ./data:/usr/src/app/data
+      
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  # Named volumes if you prefer, currently using direct path mapping above
+  data:

@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FeedbackFlow | Next-Gen Product Priority SaaS</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    
+    <div class="background-effects"></div>
+
+    <!-- Marketing Nav -->
+    <nav class="marketing-nav" id="marketing-nav">
+        <div class="logo">
+            <div class="logo-icon"></div>
+            FeedbackFlow
+        </div>
+        <div class="nav-links">
+            <a href="/developer-portal.html" class="nav-link-item" target="_blank" style="margin-right: 1.5rem; text-decoration: none; color: var(--text-secondary); font-size: 0.95rem; font-weight: 500; transition: color 0.2s;">Developer Portal ↗</a>
+            <a href="/test-site.html" class="nav-link-item" target="_blank" style="margin-right: 1.5rem; text-decoration: none; color: var(--text-secondary); font-size: 0.95rem; font-weight: 500; transition: color 0.2s;">Live Embed Demo ↗</a>
+            <button class="btn-secondary" id="btn-open-login">Sign In</button>
+            <button class="btn-primary" onclick="document.getElementById('btn-open-login').click()">Get Started</button>
+        </div>
+    </nav>
+
+    <!-- Marketing Landing Page -->
+    <main id="landing-view" class="view active">
+        <section class="hero">
+            <h1 class="reveal">Stop Guessing.<br><span class="text-gradient">Start Building What Users Want.</span></h1>
+            <p class="hero-sub reveal delay-1">The enterprise-grade feedback widget and roadmap coordinator. Unify customer requests, priorities, and announcements in a sleek one-line embed.</p>
+            <div class="hero-actions reveal delay-2">
+                <button class="btn-primary large" onclick="document.getElementById('btn-open-login').click()">Start Free Trial</button>
+                <a href="/test-site.html" target="_blank" class="btn-secondary large" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">Try Live Widget ↗</a>
+            </div>
+        </section>
+
+        <!-- Bento Grid marketing features -->
+        <section class="bento-grid-container">
+            <div class="bento-grid">
+                <!-- Bento 1 -->
+                <div class="bento-box bento-wide reveal">
+                    <div class="bento-content">
+                        <h3>One-Line Javascript Installation</h3>
+                        <p>Inject our lightweight, isolated shadow-DOM widget into your app in seconds. Works with React, Next.js, Vue, Webflow, or raw HTML.</p>
+                        <pre class="code-block" style="margin-top: 1.5rem;"><code>&lt;script src="https://feedbackflow.app/widget.js" data-project-key="YOUR_KEY"&gt;&lt;/script&gt;</code></pre>
+                    </div>
+                </div>
+
+                <!-- Bento 2 -->
+                <div class="bento-box bento-tall reveal delay-1">
+                    <div class="bento-content">
+                        <h3>Prioritize with Real Customer Demand</h3>
+                        <p>Give users a voice. Let them request features and upvote what matters most. Attract upvotes, track emails, and build with conviction.</p>
+                        <div class="bento-visual">
+                            <div class="mock-vote">
+                                <span class="vote-num">215</span>
+                                <span class="vote-lbl">Upvotes</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bento 3 -->
+                <div class="bento-box reveal delay-2">
+                    <div class="bento-content">
+                        <h3>Multi-Tenant Workspaces</h3>
+                        <p>Manage separate feedback boards, customizable roadmap lists, and custom layouts for all your products from one unified dashboard.</p>
+                    </div>
+                </div>
+
+                <!-- Bento 4 -->
+                <div class="bento-box reveal delay-1">
+                    <div class="bento-content">
+                        <h3>Comment Threads</h3>
+                        <p>Reply directly to submissions, ask clarifying questions, and close the loop with customers securely.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <footer class="marketing-footer">
+            <p>&copy; 2026 FeedbackFlow Inc. Premium Customer Feedback SaaS.</p>
+        </footer>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal-backdrop">
+        <div class="modal-content glass-panel">
+            <button class="modal-close" id="btn-close-login">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <div class="logo justify-center mb-2" style="margin-bottom: 2rem; justify-content: center;">
+                <div class="logo-icon"></div>
+                FeedbackFlow
+            </div>
+            <h2 style="text-align:center; margin-bottom: 1.5rem; letter-spacing: -0.02em;">Welcome to Console</h2>
+            <form id="form-login">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="login-user" class="glass-input" required placeholder="admin">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-pass" class="glass-input" required placeholder="password123">
+                </div>
+                <div id="login-error" style="color:#f87171; font-size:0.85rem; display:none; margin-bottom:1rem; text-align: center;">Invalid credentials</div>
+                <button type="submit" class="btn-primary w-100">Sign In to Dashboard</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main SaaS Admin Console UI -->
+    <div id="app-view" class="view">
+        
+        <!-- Dashboard Sidebar -->
+        <aside class="sidebar glass-panel">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon"></div>
+                    FeedbackFlow
+                </div>
+            </div>
+
+            <!-- Multi-Project Switcher Component -->
+            <div class="project-switcher-container">
+                <label class="project-label">Active Workspace</label>
+                <div class="project-selector-wrapper">
+                    <select id="project-selector" class="project-dropdown glass-input">
+                        <!-- Populated by JS -->
+                    </select>
+                    <button class="btn-add-project" id="btn-add-project" title="Create New Project">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="app-nav">
+                <button class="nav-btn active" data-target="analytics-board">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+                    Analytics Overview
+                </button>
+                <button class="nav-btn" data-target="feedback-board">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                    Feedback Board
+                </button>
+                <button class="nav-btn" data-target="roadmap-board">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                    Roadmap Kanban
+                </button>
+                <button class="nav-btn" data-target="customizer-board">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                    Widget Customizer
+                </button>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <div class="user-badge">
+                    <div class="user-avatar">A</div>
+                    <div class="user-details">
+                        <span class="user-name">Administrator</span>
+                        <span class="user-role">SaaS Owner</span>
+                    </div>
+                </div>
+                <button class="btn-secondary w-100" id="btn-logout" style="margin-top: 1rem;">Sign Out</button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace Scrollable Container -->
+        <div class="app-content">
+            
+            <!-- Pane 1: Analytics Overview -->
+            <div id="analytics-board" class="app-pane active">
+                <header class="pane-header">
+                    <div>
+                        <h2>Analytics Dashboard</h2>
+                        <p class="subtitle">Ecosystem trends and voter metrics</p>
+                    </div>
+                </header>
+
+                <div class="analytics-metrics-grid">
+                    <div class="metric-card glass-panel">
+                        <span class="metric-label">Total Submissions</span>
+                        <h3 id="stat-total-feedback">0</h3>
+                    </div>
+                    <div class="metric-card glass-panel">
+                        <span class="metric-label">Total Upvotes Cast</span>
+                        <h3 id="stat-total-votes">0</h3>
+                    </div>
+                    <div class="metric-card glass-panel">
+                        <span class="metric-label">Monitored Products</span>
+                        <h3 id="stat-total-projects">0</h3>
+                    </div>
+                </div>
+
+                <div class="analytics-charts-grid">
+                    <!-- Chart 1: Category Distribution -->
+                    <div class="chart-card glass-panel">
+                        <h4>Category Breakdown</h4>
+                        <div class="bar-chart-container" id="chart-categories">
+                            <!-- Populated dynamically via SVG/HTML bars -->
+                        </div>
+                    </div>
+
+                    <!-- Chart 2: Status Breakdown -->
+                    <div class="chart-card glass-panel">
+                        <h4>Roadmap Distributions</h4>
+                        <div class="donut-chart-container" id="chart-statuses">
+                            <!-- Populated dynamically via SVG/HTML bars -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-breakdown-card glass-panel" style="margin-top: 1.5rem;">
+                    <h4>Project Share & Voting Engagement</h4>
+                    <div class="table-responsive">
+                        <table class="dashboard-table">
+                            <thead>
+                                <tr>
+                                    <th>Workspace Name</th>
+                                    <th>Feature Requests</th>
+                                    <th>User Votes</th>
+                                    <th>Voter Engagement</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-project-breakdown">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pane 2: Feedback Board -->
+            <div id="feedback-board" class="app-pane">
+                <header class="pane-header">
+                    <div>
+                        <h2>Feedback Board</h2>
+                        <p class="subtitle">Inspect, prioritize, and click cards to discuss</p>
+                    </div>
+                </header>
+
+                <!-- Dedicated Filters and Search Toolbar -->
+                <div class="board-toolbar glass-panel">
+                    <div class="search-input-wrapper">
+                        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input type="text" id="toolbar-search" class="glass-input" placeholder="Search topics, requests, or users...">
+                    </div>
+                    
+                    <div class="filter-controls">
+                        <select id="toolbar-filter-category" class="glass-input select-filter">
+                            <option value="all">All Categories</option>
+                            <option value="feature">Features</option>
+                            <option value="bug">Bugs</option>
+                            <option value="improvement">Improvements</option>
+                        </select>
+                        <select id="toolbar-filter-status" class="glass-input select-filter">
+                            <option value="all">All Statuses</option>
+                            <option value="none">New / Unscheduled</option>
+                            <option value="planned">Planned</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="done">Completed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="feedback-grid" id="feedback-list-container">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- Pane 3: Roadmap Kanban Board -->
+            <div id="roadmap-board" class="app-pane">
+                <header class="pane-header">
+                    <div>
+                        <h2>Kanban Roadmap</h2>
+                        <p class="subtitle">Drag & Drop status operations or select cards to interact</p>
+                    </div>
+                </header>
+                
+                <div class="roadmap-columns">
+                    <!-- Planned -->
+                    <div class="rm-column glass-panel">
+                        <div class="rm-column-header">
+                            <span class="dot planned"></span>
+                            <h3>Planned</h3>
+                            <span class="count" id="count-planned">0</span>
+                        </div>
+                        <div class="rm-list" id="rm-planned"></div>
+                    </div>
+
+                    <!-- In Progress -->
+                    <div class="rm-column glass-panel">
+                        <div class="rm-column-header">
+                            <span class="dot in-progress"></span>
+                            <h3>In Progress</h3>
+                            <span class="count" id="count-in-progress">0</span>
+                        </div>
+                        <div class="rm-list" id="rm-in-progress"></div>
+                    </div>
+
+                    <!-- Completed -->
+                    <div class="rm-column glass-panel">
+                        <div class="rm-column-header">
+                            <span class="dot completed"></span>
+                            <h3>Completed</h3>
+                            <span class="count" id="count-completed">0</span>
+                        </div>
+                        <div class="rm-list" id="rm-completed"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pane 4: Widget Customizer -->
+            <div id="customizer-board" class="app-pane">
+                <header class="pane-header">
+                    <div>
+                        <h2>Widget Customizer Playground</h2>
+                        <p class="subtitle">Style, preview in real time, and copy deployment keys</p>
+                    </div>
+                </header>
+
+                <div class="customizer-container">
+                    <!-- Editor Panel -->
+                    <div class="customizer-sidebar glass-panel">
+                        <h4 style="margin-bottom:1.5rem;">Visual Configuration</h4>
+                        
+                        <div class="form-group">
+                            <label>Brand Theme Color</label>
+                            <div class="color-picker-wrapper">
+                                <input type="color" id="theme-color-input" value="#6366f1">
+                                <input type="text" id="theme-color-hex" class="glass-input" value="#6366f1" style="flex:1;">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Widget Welcome Title</label>
+                            <input type="text" id="widget-title-input" class="glass-input" value="Feature Requests">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Button Floating Position</label>
+                            <select id="widget-position-input" class="glass-input">
+                                <option value="right">Bottom Right</option>
+                                <option value="left">Bottom Left</option>
+                            </select>
+                        </div>
+
+                        <button id="btn-save-customizer" class="btn-primary w-100" style="margin-top: 1rem;">Save Brand Configuration</button>
+
+                        <hr class="subtle-divider" style="margin: 2rem 0;">
+
+                        <h4>Integration Script Code</h4>
+                        <p class="section-desc">Pasted before the closing &lt;/body&gt; of your HTML:</p>
+                        
+                        <div style="position: relative; margin-top: 1rem;">
+                            <pre class="code-block"><code id="snippet-code"></code></pre>
+                            <button class="btn-secondary" id="btn-copy" style="position: absolute; top: 0.75rem; right: 0.75rem; padding: 6px 12px; font-size: 0.8rem;">Copy Code</button>
+                        </div>
+
+                        <hr class="subtle-divider" style="margin: 1.5rem 0;">
+
+                        <h4>Standalone Shareable Portal</h4>
+                        <p class="section-desc">No website to embed in? Gather feedback directly on a stunning customer-facing webpage board:</p>
+                        
+                        <div style="display: flex; gap: 8px; margin-top: 0.75rem;">
+                            <input type="text" id="share-portal-url" class="glass-input" readonly style="flex: 1; font-size: 0.78rem; height:34px;">
+                            <button class="btn-primary" id="btn-copy-portal-url" style="padding: 0 12px; font-size: 0.78rem; font-weight: 700; height:34px; border-radius:6px;">Copy</button>
+                        </div>
+                        <button class="btn-secondary w-100" id="btn-view-portal" style="margin-top: 0.75rem; height:34px; font-size:0.8rem; font-weight:600; border-radius:6px;">🔗 Open Shareable Portal Page</button>
+                    </div>
+
+                    <!-- Live Mockup Panel -->
+                    <div class="customizer-preview glass-panel">
+                        <h4>Live Widget Playground</h4>
+                        <p class="section-desc">Interact with the actual widget on the bottom right styled with your configurations</p>
+                        
+                        <div class="mockup-sandbox">
+                            <div class="sandbox-header">
+                                <span class="dot-btn red"></span>
+                                <span class="dot-btn yellow"></span>
+                                <span class="dot-btn green"></span>
+                                <span class="sandbox-title">my-saas-website.com/dashboard</span>
+                            </div>
+                            <div class="sandbox-screen">
+                                <div class="sandbox-content">
+                                    <h3>Awesome Product Admin Screen</h3>
+                                    <p>Your client sees this screen. The floating widget in the corner is isolatably injected securely.</p>
+                                    <div class="button-row">
+                                        <button class="btn-primary" style="opacity: 0.3; pointer-events: none;">Primary Action</button>
+                                        <button class="btn-secondary" style="opacity: 0.3; pointer-events: none;">Secondary Action</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Active Workspace Creation Modal -->
+    <div id="project-create-modal" class="modal-backdrop">
+        <div class="modal-content glass-panel">
+            <button class="modal-close" id="btn-close-project-modal">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <h2 style="margin-bottom:1.5rem; letter-spacing: -0.02em;">Create Workspace</h2>
+            <form id="form-create-project">
+                <div class="form-group">
+                    <label>Workspace / Product Name</label>
+                    <input type="text" id="project-name-input" class="glass-input" required placeholder="e.g. Android Customer App">
+                </div>
+                <button type="submit" class="btn-primary w-100" style="margin-top: 1rem;">Create Workspace</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Threaded Comments Side Drawer Component (Slide-out panel) -->
+    <div id="drawer-feedback" class="drawer-overlay">
+        <div class="drawer-panel glass-panel">
+            <div class="drawer-header">
+                <div class="drawer-title-row">
+                    <span id="drawer-category-badge" class="category-badge">Badge</span>
+                    <button class="drawer-close" id="btn-close-drawer">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+                <h3 id="drawer-title">Feature Title</h3>
+                <p id="drawer-description" class="drawer-description">Detailed description goes here...</p>
+                <div class="drawer-metadata">
+                    <div class="meta-item">
+                        <span class="meta-label">Suggested By</span>
+                        <span id="drawer-author" class="meta-value">Sarah Jenkins (sarah@co.com)</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Upvotes</span>
+                        <span id="drawer-votes" class="meta-value">142</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls panel inside drawer -->
+            <div class="drawer-actions">
+                <div class="form-group">
+                    <label>Priority Roadmapping Status</label>
+                    <select id="drawer-status-select" class="glass-input">
+                        <option value="none">Unscheduled / New</option>
+                        <option value="planned">Planned</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="done">Completed</option>
+                    </select>
+                </div>
+                <button id="btn-drawer-delete" class="btn-secondary w-100" style="border-color: rgba(239, 68, 68, 0.4); color: #f87171; margin-top: 0.5rem;">Delete Feedback Card</button>
+            </div>
+
+            <!-- Threaded Comments List -->
+            <div class="drawer-comments-section">
+                <h4>Threaded Discussions</h4>
+                <div class="comments-list" id="drawer-comments-list">
+                    <!-- Populated by JS -->
+                </div>
+                
+                <!-- Comment submission form -->
+                <form id="drawer-comment-form" class="comment-submission-form">
+                    <textarea id="drawer-comment-input" class="glass-input" rows="3" placeholder="Write a response or ask for clarification..." required></textarea>
+                    <button type="submit" class="btn-primary w-100" style="padding: 10px; margin-top: 0.75rem; font-size: 0.9rem;">Post Comment</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Widget JS (Automatically scopes customizers on active preview) -->
+    <script src="widget.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

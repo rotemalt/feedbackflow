@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Feedback & Release Roadmap | FeedbackFlow</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Standalone Public Portal Stylesheet */
+        #portal-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            min-height: 100vh;
+        }
+
+        .portal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 1.75rem;
+            background: rgba(15, 15, 20, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            box-shadow: var(--shadow-premium);
+        }
+
+        .portal-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: #ffffff;
+        }
+
+        .portal-brand-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--accent), #818cf8);
+            border-radius: 6px;
+            position: relative;
+        }
+        .portal-brand-icon::after {
+            content: '';
+            position: absolute;
+            top: 7px;
+            left: 7px;
+            width: 14px;
+            height: 14px;
+            border-left: 2.5px solid #ffffff;
+            border-bottom: 2.5px solid #ffffff;
+            transform: rotate(-45deg);
+        }
+
+        .portal-nav {
+            display: flex;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-subtle);
+            padding: 4px;
+            border-radius: 10px;
+            gap: 4px;
+        }
+
+        .portal-nav-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .portal-nav-btn.active {
+            background: var(--accent);
+            color: #ffffff;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        /* Views Grid */
+        .portal-view {
+            display: none;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .portal-view.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Board grid */
+        .board-layout {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .board-layout {
+                grid-template-columns: 1fr;
+            }
+            .sidebar-panel {
+                position: static !important;
+                height: auto !important;
+            }
+        }
+
+        .cards-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .sidebar-panel {
+            position: sticky;
+            top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        /* Customer Facing Cards */
+        .portal-card {
+            background: rgba(20, 20, 25, 0.4);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.25rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .portal-card:hover {
+            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            background: rgba(25, 25, 30, 0.5);
+        }
+
+        .portal-card.selected {
+            border-color: var(--accent);
+            background: rgba(99, 102, 241, 0.04);
+        }
+
+        .vote-action-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #ffffff;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            min-width: 44px;
+            transition: var(--transition-smooth);
+        }
+
+        .vote-action-btn:hover, .vote-action-btn.voted {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        /* Roadmap columns */
+        .roadmap-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .roadmap-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .roadmap-col {
+            background: rgba(15, 15, 20, 0.4);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-height: 400px;
+        }
+
+        .roadmap-col-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-subtle);
+            margin-bottom: 4px;
+        }
+
+        /* Details & Comment pane */
+        .details-pane {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .comment-bubble {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+
+        .comment-badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .comment-badge.admin { color: #f59e0b; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.15); }
+        .comment-badge.user { color: #3b82f6; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.15); }
+
+        .watermark {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: auto;
+            padding-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="background-effects"></div>
+
+    <div id="portal-container">
+        
+        <!-- Header -->
+        <header class="portal-header">
+            <div class="portal-brand">
+                <div class="portal-brand-icon"></div>
+                <span id="portal-workspace-name">Feedback Board</span>
+            </div>
+            
+            <nav class="portal-nav">
+                <button class="portal-nav-btn active" id="btn-tab-board" onclick="switchView('board')">Feedback Board</button>
+                <button class="portal-nav-btn" id="btn-tab-roadmap" onclick="switchView('roadmap')">Release Roadmap</button>
+            </nav>
+        </header>
+
+        <!-- View 1: Feedback Board -->
+        <div id="view-board" class="portal-view active">
+            <div class="board-layout">
+                
+                <!-- Cards List (Left) -->
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <!-- Filter Toolbar -->
+                    <div class="glass-panel" style="padding: 1rem; display: flex; gap: 12px; align-items: center;">
+                        <input type="text" id="board-search" class="glass-input" placeholder="Search feature requests..." oninput="renderCards()" style="flex: 1; height: 38px;">
+                        
+                        <select id="board-filter-category" class="glass-input" onchange="renderCards()" style="width: 140px; height: 38px;">
+                            <option value="all">All Categories</option>
+                            <option value="feature">Features</option>
+                            <option value="bug">Bugs</option>
+                            <option value="improvement">Improvements</option>
+                        </select>
+                    </div>
+
+                    <!-- Cards -->
+                    <div class="cards-list" id="cards-list-el">
+                        <!-- Javascript injection -->
+                    </div>
+                </div>
+
+                <!-- Action Panel (Right) -->
+                <div class="sidebar-panel">
+                    
+                    <!-- Submit Request Panel (Default) -->
+                    <div class="glass-panel details-pane" id="panel-submit-feedback" style="padding: 1.5rem;">
+                        <div>
+                            <h3 id="portal-welcome-title">Submit Feedback Suggestion</h3>
+                            <p style="font-size: 0.82rem; color: var(--text-secondary);">Help us improve by writing your request below.</p>
+                        </div>
+                        
+                        <form onsubmit="submitFeedback(event)" style="display:flex; flex-direction:column; gap:10px;">
+                            <div class="form-group">
+                                <label>Title of request</label>
+                                <input type="text" id="form-title" class="glass-input" placeholder="What would you like to see?" required style="height: 38px;">
+                            </div>
+                            <div class="form-group">
+                                <label>Detailed description</label>
+                                <textarea id="form-description" class="glass-input" placeholder="Explain the problem or use case..." required style="height: 100px; padding: 10px; resize: none;"></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Category</label>
+                                <select id="form-category" class="glass-input" style="height: 38px;">
+                                    <option value="feature">Feature Request</option>
+                                    <option value="bug">Bug Report</option>
+                                    <option value="improvement">UI/Performance Improvement</option>
+                                </select>
+                            </div>
+
+                            <div id="form-identity-fields" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div class="form-group">
+                                    <label>Your Name</label>
+                                    <input type="text" id="form-name" class="glass-input" placeholder="Name" style="height: 38px;">
+                                </div>
+                                <div class="form-group">
+                                    <label>Your Email</label>
+                                    <input type="email" id="form-email" class="glass-input" placeholder="email@co.com" style="height: 38px;">
+                                </div>
+                            </div>
+                            
+                            <div id="form-ident-notice" style="display:none; font-size:0.75rem; color:#34d399; font-weight:600;">
+                                ✓ Verified Submitter Session Configured
+                            </div>
+
+                            <button class="btn-primary" type="submit" style="height: 40px; margin-top: 6px; font-weight:700; border-radius: 8px;">Submit Suggestion</button>
+                        </form>
+                    </div>
+
+                    <!-- Card Thread Details Panel (Hidden by default) -->
+                    <div class="glass-panel details-pane" id="panel-card-details" style="padding: 1.5rem; display: none;">
+                        <button class="btn-primary" style="align-self: flex-start; padding: 6px 12px; font-size:0.75rem; background:rgba(255,255,255,0.05); color:#fff; border:1px solid var(--border-subtle);" onclick="closeCardDetails()">
+                            ← Submit New Request
+                        </button>
+                        
+                        <div style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                <span class="comment-badge user" id="detail-category" style="text-transform: uppercase;">FEATURE</span>
+                                <span id="detail-status" style="font-size:0.7rem; font-weight:700; text-transform:uppercase; color:var(--text-secondary);">New</span>
+                            </div>
+                            <h3 id="detail-title" style="margin-bottom:6px; letter-spacing:-0.01em;">Card Title</h3>
+                            <p id="detail-desc" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">Detailed Card description...</p>
+                            
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
+                                <div style="font-size:0.75rem; color:var(--text-muted);" id="detail-author">Submitted by Anonymous</div>
+                                <div class="vote-action-btn" id="detail-vote-btn" onclick="voteOnDetail()">
+                                    <span>▲</span>
+                                    <span id="detail-votes">1</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Comments Thread -->
+                        <div>
+                            <h4 style="margin-bottom: 8px;">Discussion Thread</h4>
+                            <div id="detail-comments-list" style="max-height: 200px; overflow-y: auto; margin-bottom: 12px;">
+                                <!-- Comments injection -->
+                            </div>
+
+                            <form onsubmit="submitComment(event)" style="display: flex; gap: 8px;">
+                                <input type="text" id="comment-input" class="glass-input" placeholder="Write a response..." required style="flex: 1; height: 36px;">
+                                <button class="btn-primary" type="submit" style="padding: 0 14px; font-size: 0.78rem; font-weight:700; height: 36px; border-radius: 8px;">Reply</button>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- View 2: Release Roadmap -->
+        <div id="view-roadmap" class="portal-view">
+            <div class="roadmap-grid">
+                
+                <!-- Planned -->
+                <div class="roadmap-col">
+                    <div class="roadmap-col-header">
+                        <span style="font-size: 0.85rem; font-weight: 700; color: #60a5fa;">Planned</span>
+                        <span class="comment-badge user" id="roadmap-count-planned" style="background:rgba(96, 165, 250, 0.1); color:#60a5fa;">0</span>
+                    </div>
+                    <div id="roadmap-list-planned" style="display:flex; flex-direction:column; gap:10px; overflow-y:auto; flex:1;">
+                        <!-- Planned cards -->
+                    </div>
+                </div>
+
+                <!-- In Progress -->
+                <div class="roadmap-col">
+                    <div class="roadmap-col-header">
+                        <span style="font-size: 0.85rem; font-weight: 700; color: #fbbf24;">In Progress</span>
+                        <span class="comment-badge user" id="roadmap-count-progress" style="background:rgba(251, 191, 36, 0.1); color:#fbbf24;">0</span>
+                    </div>
+                    <div id="roadmap-list-progress" style="display:flex; flex-direction:column; gap:10px; overflow-y:auto; flex:1;">
+                        <!-- In-progress cards -->
+                    </div>
+                </div>
+
+                <!-- Completed -->
+                <div class="roadmap-col">
+                    <div class="roadmap-col-header">
+                        <span style="font-size: 0.85rem; font-weight: 700; color: #34d399;">Completed</span>
+                        <span class="comment-badge user" id="roadmap-count-done" style="background:rgba(52, 211, 153, 0.1); color:#34d399;">0</span>
+                    </div>
+                    <div id="roadmap-list-done" style="display:flex; flex-direction:column; gap:10px; overflow-y:auto; flex:1;">
+                        <!-- Completed cards -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="watermark">
+            Powered by <strong>FeedbackFlow</strong> open-source B2B boards.
+        </div>
+
+    </div>
+
+    <script>
+        // Portal global state
+        let apiKey = '';
+        let projectConfig = null;
+        let allFeedbacks = [];
+        let activeCard = null;
+        let upvotedCardIds = [];
+
+        // Parse workspace key from URL query parameters
+        function parseQueryKey() {
+            const params = new URLSearchParams(window.location.search);
+            apiKey = params.get('key') || 'web-app-key-2026';
+        }
+
+        // Initialize Standalone Portal
+        async function initPortal() {
+            parseQueryKey();
+            loadUpvotedIds();
+            detectUserIdentContext();
+
+            await loadConfig();
+            await loadFeedbacks();
+            
+            applyConfig();
+            renderCards();
+            renderRoadmap();
+        }
+
+        function detectUserIdentContext() {
+            // Check if name/email are in query params to make testing very easy!
+            const params = new URLSearchParams(window.location.search);
+            const queryEmail = params.get('email');
+            const queryName = params.get('name');
+            
+            if (queryEmail && queryName) {
+                window.FeedbackFlow = { email: queryEmail, name: queryName };
+            }
+
+            // Check if global window contains identity configurations
+            if (window.FeedbackFlow) {
+                document.getElementById('form-identity-fields').style.display = 'none';
+                document.getElementById('form-ident-notice').style.display = 'block';
+            }
+        }
+
+        async function loadConfig() {
+            try {
+                const res = await fetch(`/api/widget-config?apiKey=${apiKey}`);
+                if (res.ok) {
+                    projectConfig = await res.json();
+                }
+            } catch(e) {}
+            
+            if (!projectConfig) {
+                projectConfig = {
+                    id: 1,
+                    name: "Default Workspace",
+                    theme_color: "#6366f1",
+                    welcome_title: "Feedback Suggestions"
+                };
+            }
+        }
+
+        async function loadFeedbacks() {
+            try {
+                const res = await fetch(`/api/feedback?projectId=${projectConfig.id}`);
+                if (res.ok) {
+                    allFeedbacks = await res.json();
+                }
+            } catch(e) {
+                allFeedbacks = [
+                    { id: 1, title: 'Sample card', description: 'Testing the public standalone portal.', category: 'feature', status: 'none', votes: 1 }
+                ];
+            }
+        }
+
+        function applyConfig() {
+            document.getElementById('portal-workspace-name').textContent = projectConfig.name;
+            document.getElementById('portal-welcome-title').textContent = projectConfig.welcome_title;
+            document.documentElement.style.setProperty('--accent', projectConfig.theme_color);
+        }
+
+        function loadUpvotedIds() {
+            try {
+                upvotedCardIds = JSON.parse(localStorage.getItem('feedbackflow-upvoted-cards') || '[]');
+            } catch(e) {
+                upvotedCardIds = [];
+            }
+        }
+
+        function saveUpvotedId(id) {
+            upvotedCardIds.push(id);
+            localStorage.setItem('feedbackflow-upvoted-cards', JSON.stringify(upvotedCardIds));
+        }
+
+        // Render card lists in board view
+        function renderCards() {
+            const listEl = document.getElementById('cards-list-el');
+            listEl.innerHTML = '';
+
+            const searchQuery = document.getElementById('board-search').value.toLowerCase();
+            const catFilter = document.getElementById('board-filter-category').value;
+
+            // Filter feedbacks to list only non-status cards or all, excluding completed if desired (we list all board cards here)
+            const filtered = allFeedbacks.filter(f => {
+                const matchesSearch = f.title.toLowerCase().includes(searchQuery) || f.description.toLowerCase().includes(searchQuery);
+                const matchesCat = catFilter === 'all' || f.category === catFilter;
+                return matchesSearch && matchesCat;
+            });
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = '<div class="glass-panel" style="padding:2rem; text-align:center; color:var(--text-secondary); font-size:0.85rem;">No feedback cards found matching query.</div>';
+                return;
+            }
+
+            filtered.forEach(f => {
+                const isVoted = upvotedCardIds.includes(f.id);
+                const card = document.createElement('div');
+                card.className = `portal-card ${activeCard && activeCard.id === f.id ? 'selected' : ''}`;
+                
+                card.innerHTML = `
+                    <div style="flex: 1; min-width: 0;" onclick="openCardDetails(${f.id})">
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                            <span class="comment-badge user">${f.category}</span>
+                            ${f.status !== 'none' ? `<span style="font-size:0.65rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">● ${f.status}</span>` : ''}
+                        </div>
+                        <h4 style="margin: 0 0 4px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${f.title}</h4>
+                        <p style="margin: 0; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${f.description}</p>
+                    </div>
+                    <button class="vote-action-btn ${isVoted ? 'voted' : ''}" onclick="voteOnCard(${f.id}, event)">
+                        <span>▲</span>
+                        <span>${f.votes}</span>
+                    </button>
+                `;
+                listEl.appendChild(card);
+            });
+        }
+
+        // Render roadmap board
+        function renderRoadmap() {
+            const planList = document.getElementById('roadmap-list-planned');
+            const progList = document.getElementById('roadmap-list-progress');
+            const doneList = document.getElementById('roadmap-list-done');
+
+            planList.innerHTML = '';
+            progList.innerHTML = '';
+            doneList.innerHTML = '';
+
+            const planCards = allFeedbacks.filter(f => f.status === 'planned');
+            const progCards = allFeedbacks.filter(f => f.status === 'in-progress' || f.status === 'progress');
+            const doneCards = allFeedbacks.filter(f => f.status === 'done');
+
+            document.getElementById('roadmap-count-planned').textContent = planCards.length;
+            document.getElementById('roadmap-count-progress').textContent = progCards.length;
+            document.getElementById('roadmap-count-done').textContent = doneCards.length;
+
+            const makeRoadmapCard = (c) => {
+                const isVoted = upvotedCardIds.includes(c.id);
+                const div = document.createElement('div');
+                div.className = 'portal-card';
+                div.style.padding = '10px 12px';
+                div.innerHTML = `
+                    <div style="flex:1; min-width:0;" onclick="switchView('board'); openCardDetails(${c.id});">
+                        <div style="font-size:0.8rem; font-weight:600; color:#fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${c.title}</div>
+                        <span style="font-size:0.6rem; color:var(--text-secondary); text-transform:uppercase; font-weight:700;">${c.category}</span>
+                    </div>
+                    <div class="vote-action-btn ${isVoted ? 'voted' : ''}" onclick="voteOnCard(${c.id}, event)" style="padding: 2px 6px; min-width:32px;">
+                        <span>▲</span>
+                        <span>${c.votes}</span>
+                    </div>
+                `;
+                return div;
+            };
+
+            planCards.forEach(c => planList.appendChild(makeRoadmapCard(c)));
+            progCards.forEach(c => progList.appendChild(makeRoadmapCard(c)));
+            doneCards.forEach(c => doneList.appendChild(makeRoadmapCard(c)));
+        }
+
+        // View tabs switcher
+        function switchView(view) {
+            document.querySelectorAll('.portal-view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.portal-nav-btn').forEach(btn => btn.classList.remove('active'));
+            
+            if (view === 'board') {
+                document.getElementById('view-board').classList.add('active');
+                document.getElementById('btn-tab-board').classList.add('active');
+            } else {
+                document.getElementById('view-roadmap').classList.add('active');
+                document.getElementById('btn-tab-roadmap').classList.add('active');
+                renderRoadmap();
+            }
+        }
+
+        // Open Thread Details
+        async function openCardDetails(id) {
+            activeCard = allFeedbacks.find(c => c.id === id);
+            if (!activeCard) return;
+
+            // Highlight selected card in board
+            renderCards();
+
+            // Toggle side panel views
+            document.getElementById('panel-submit-feedback').style.display = 'none';
+            const detailsPanel = document.getElementById('panel-card-details');
+            detailsPanel.style.display = 'flex';
+
+            // Fill card details
+            document.getElementById('detail-title').textContent = activeCard.title;
+            document.getElementById('detail-desc').textContent = activeCard.description;
+            document.getElementById('detail-votes').textContent = activeCard.votes;
+            document.getElementById('detail-status').textContent = activeCard.status === 'none' ? 'New' : activeCard.status;
+            document.getElementById('detail-category').textContent = activeCard.category;
+            
+            const submitter = activeCard.user_name || 'Anonymous User';
+            document.getElementById('detail-author').textContent = `Submitted by ${submitter}`;
+
+            // Set upvote button state
+            const voteBtn = document.getElementById('detail-vote-btn');
+            if (upvotedCardIds.includes(activeCard.id)) {
+                voteBtn.classList.add('voted');
+            } else {
+                voteBtn.classList.remove('voted');
+            }
+
+            // Load comment threads
+            await loadComments();
+        }
+
+        function closeCardDetails() {
+            activeCard = null;
+            renderCards();
+
+            document.getElementById('panel-card-details').style.display = 'none';
+            document.getElementById('panel-submit-feedback').style.display = 'flex';
+        }
+
+        async function loadComments() {
+            if (!activeCard) return;
+            const listEl = document.getElementById('detail-comments-list');
+            listEl.innerHTML = '<div style="color:var(--text-secondary); font-size:0.75rem; text-align:center;">Loading comments...</div>';
+
+            try {
+                const res = await fetch(`/api/feedback/${activeCard.id}/comments`);
+                if (res.ok) {
+                    const comments = await res.json();
+                    listEl.innerHTML = '';
+                    if (comments.length === 0) {
+                        listEl.innerHTML = '<div style="color:var(--text-muted); font-size:0.78rem; text-align:center; padding:10px;">No comments yet. Start the conversation!</div>';
+                        return;
+                    }
+                    comments.forEach(c => {
+                        const bubble = document.createElement('div');
+                        bubble.className = 'comment-bubble';
+                        
+                        bubble.innerHTML = `
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                <strong style="font-size:0.8rem; color:#fff;">${c.author_name}</strong>
+                                <span class="comment-badge ${c.author_role}">${c.author_role}</span>
+                            </div>
+                            <div style="color:var(--text-secondary); font-size:0.82rem;">${c.content}</div>
+                        `;
+                        listEl.appendChild(bubble);
+                    });
+                    listEl.scrollTop = listEl.scrollHeight;
+                }
+            } catch(e) {
+                listEl.innerHTML = '<div style="color:#f87171; font-size:0.75rem;">Failed loading comments.</div>';
+            }
+        }
+
+        // Handle upvote cast on a card
+        async function voteOnCard(id, event) {
+            if (event) event.stopPropagation();
+            if (upvotedCardIds.includes(id)) return; // Prevents double votes in demo
+
+            try {
+                const res = await fetch(`/api/feedback/${id}/vote`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'upvote' })
+                });
+                if (res.ok) {
+                    saveUpvotedId(id);
+                    const card = allFeedbacks.find(c => c.id === id);
+                    if (card) card.votes++;
+                    renderCards();
+                    
+                    if (activeCard && activeCard.id === id) {
+                        activeCard.votes++;
+                        document.getElementById('detail-votes').textContent = activeCard.votes;
+                        document.getElementById('detail-vote-btn').classList.add('voted');
+                    }
+                }
+            } catch(e) {}
+        }
+
+        function voteOnDetail() {
+            if (!activeCard) return;
+            voteOnCard(activeCard.id);
+        }
+
+        // Submit new feedback card
+        async function submitFeedback(event) {
+            event.preventDefault();
+            const title = document.getElementById('form-title').value;
+            const description = document.getElementById('form-description').value;
+            const category = document.getElementById('form-category').value;
+            
+            let name = 'Anonymous';
+            let email = '';
+
+            if (window.FeedbackFlow) {
+                name = window.FeedbackFlow.name || name;
+                email = window.FeedbackFlow.email || email;
+            } else {
+                name = document.getElementById('form-name').value || name;
+                email = document.getElementById('form-email').value || email;
+            }
+
+            const payload = {
+                project_id: projectConfig.id,
+                title,
+                description,
+                category,
+                user_name: name,
+                user_email: email
+            };
+
+            try {
+                const res = await fetch('/api/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    const fresh = await res.json();
+                    allFeedbacks.unshift(fresh);
+                    
+                    // Reset Form
+                    document.getElementById('form-title').value = '';
+                    document.getElementById('form-description').value = '';
+                    
+                    renderCards();
+                    
+                    // Auto-open detail to view comments and AI Agent response!
+                    openCardDetails(fresh.id);
+                } else {
+                    alert("Submission failed. Please verify configurations.");
+                }
+            } catch(e) {
+                alert("Server connection failed.");
+            }
+        }
+
+        // Submit new comment thread reply
+        async function submitComment(event) {
+            event.preventDefault();
+            if (!activeCard) return;
+
+            const input = document.getElementById('comment-input');
+            const content = input.value;
+            
+            let author_name = 'Anonymous User';
+            if (window.FeedbackFlow) {
+                author_name = window.FeedbackFlow.name || author_name;
+            }
+
+            try {
+                const res = await fetch(`/api/feedback/${activeCard.id}/comments`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content, author_name })
+                });
+                if (res.ok) {
+                    input.value = '';
+                    await loadComments();
+                }
+            } catch(e) {}
+        }
+
+        // Initialize portal on load
+        window.addEventListener('DOMContentLoaded', initPortal);
+    </script>
+</body>
+</html>
