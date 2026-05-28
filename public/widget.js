@@ -60,7 +60,13 @@
             this.backendUrl = 'http://localhost:4000';
             if (scriptTag && scriptTag.src) {
                 try {
-                    this.backendUrl = new URL(scriptTag.src).origin;
+                    const srcUrl = scriptTag.src;
+                    if (srcUrl.includes('://')) {
+                        // Dynamically extract the exact directory path of the script
+                        this.backendUrl = srcUrl.substring(0, srcUrl.lastIndexOf('/'));
+                    } else {
+                        this.backendUrl = '';
+                    }
                 } catch(e) {}
             }
 
