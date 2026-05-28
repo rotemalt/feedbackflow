@@ -170,6 +170,46 @@ FeedbackFlow exposes high-performance JSON REST endpoints:
 
 ---
 
+## 🚀 Transitioning to Production: Deploying to a Real SaaS
+
+When you transition FeedbackFlow from a local testing environment (`http://localhost:4000`) into a production B2B SaaS platform, follow these simple guidelines:
+
+### 1. Zero-Config Dynamic Host Detection (The Widget Magic)
+You do **not** need to change any URLs or re-build `widget.js` when moving to production! 
+
+The client widget bundle features built-in **Dynamic Host Auto-Detection**:
+```javascript
+// Automatically parsed by widget.js under the hood:
+this.backendUrl = new URL(scriptTag.src).origin;
+```
+This means if you load the script from your production domain:
+```html
+<!-- The widget automatically talks to https://feedback.rotemalt.com! -->
+<script src="https://feedback.rotemalt.com/widget.js" data-project-key="YOUR_WORKSPACE_KEY"></script>
+```
+The widget dynamically handles all upvotes, discussion comments, and feedback submissions against `https://feedback.rotemalt.com` automatically, with no hardcoded domain configs required!
+
+### 2. Deploying Your Cloud Container
+Deploy the Docker Compose container or the simple Node script to a cloud VPS (like DigitalOcean, AWS, Linode) or a cloud-container runner (like Railway, Render, Fly.io):
+
+*   **Setup SSL & Domain (Nginx/Cloudflare)**: Wrap your Docker port `4000` with an Nginx reverse proxy or Cloudflare proxy to serve HTTPS (e.g., `https://feedback.rotemalt.com`). Secure sockets are required to embed widgets inside modern HTTPS-secured SaaS products.
+*   **Persist Your SQLite Database**: Ensure you map the local data volume inside your docker configuration:
+    ```yaml
+    volumes:
+      - ./data:/usr/src/app/data  # Keeps your feedback, comments, and project settings secure during restarts!
+    ```
+*   **Harden Security Environment**:
+    *   Change `JWT_SECRET` in production to a secure, cryptographically random UUID.
+    *   Inject your custom `GEMINI_API_KEY` to activate background AI categorizers.
+
+### 3. Share Your Standalone Portal Page (Zero-Code Board)
+If you don't want to embed scripts inside your client code, you can share a permanent, fully functional public feedback website directly:
+`https://feedback.rotemalt.com/portal.html?key=YOUR_WORKSPACE_KEY`
+
+Startups and open-source projects can link this URL in their app header, push it directly to their Twitter/GitHub readmes, or include it in customer newsletters to gather feature requests on a premium standalone board immediately!
+
+---
+
 ## 🤝 Community & Contributions
 
 We are committed to open-core principles:
