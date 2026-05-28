@@ -73,7 +73,7 @@
             // Load styling stylesheet
             const link = document.createElement('link');
             link.rel = 'stylesheet';
-            link.href = `${this.backendUrl}/widget.css`;
+            link.href = `${this.backendUrl}/widget.css?v=1.0.2`;
             this.shadow.appendChild(link);
 
             // Fetch dynamic Workspace Configs
