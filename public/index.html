@@ -380,9 +380,9 @@
                     <!-- Live Mockup Panel -->
                     <div class="customizer-preview glass-panel">
                         <h4>Live Widget Playground</h4>
-                        <p class="section-desc">Interact with the actual widget on the bottom right styled with your configurations</p>
+                        <p class="section-desc">Test and interact with the floating customer widget on a realistic SaaS product dashboard</p>
                         
-                        <div class="mockup-sandbox">
+                        <div class="mockup-sandbox" style="margin-top: 1rem;">
                             <div class="sandbox-header">
                                 <span class="dot-btn red"></span>
                                 <span class="dot-btn yellow"></span>
@@ -390,13 +390,14 @@
                                 <span class="sandbox-title">my-saas-website.com/dashboard</span>
                             </div>
                             <div class="sandbox-screen">
-                                <div class="sandbox-content">
-                                    <h3>Awesome Product Admin Screen</h3>
-                                    <p>Your client sees this screen. The floating widget in the corner is isolatably injected securely.</p>
-                                    <div class="button-row">
-                                        <button class="btn-primary" style="opacity: 0.3; pointer-events: none;">Primary Action</button>
-                                        <button class="btn-secondary" style="opacity: 0.3; pointer-events: none;">Secondary Action</button>
-                                    </div>
+                                <div class="sandbox-content" style="text-align: center; padding: 1.5rem 1rem;">
+                                    <h3 style="margin-bottom: 0.5rem;">Simulated SaaS Client Page</h3>
+                                    <p style="font-size: 0.8rem; margin-bottom: 1.25rem; color: var(--text-secondary);">
+                                        Open the interactive workspace simulation page to test your customized floating widget in the bottom-right corner!
+                                    </p>
+                                    <a href="/test-site.html" target="_blank" class="btn-primary" style="display: inline-block; text-decoration: none; padding: 8px 20px; font-weight: 700; background: #6366f1; color: white; border-radius: 6px; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);">
+                                        🚀 VIEW WIDGET DEMO ↗
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -478,8 +479,7 @@
         </div>
     </div>
 
-    <!-- Live Widget JS (Automatically scopes customizers on active preview) -->
-    <script src="widget.js"></script>
+    <!-- Admin Dashboard Application Logic -->
     <script src="app.js"></script>
 </body>
 </html>

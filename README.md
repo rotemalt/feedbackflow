@@ -19,6 +19,10 @@
   A high-performance, open-source alternative to <strong>Canny</strong>, <strong>Productboard</strong>, and <strong>FeatureUpvote</strong>. Inject a stunning, Shadow-DOM isolated feedback board and release roadmap into your SaaS product in under 60 seconds.
 </p>
 
+<p align="center">
+  <a href="https://rotemalt.github.io/feedbackflow/public/test-site.html" style="font-weight: 800; font-size: 1.25rem; color: #3b82f6; text-decoration: underline;">⚡ LIVE INTERACTIVE WIDGET DEMO ↗</a>
+</p>
+
 ---
 
 ## ⚡ The Zero-Bloat, Zero-Friction Story
