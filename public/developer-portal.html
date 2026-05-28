@@ -654,6 +654,18 @@ export default {
                         <pre class="code-block" style="font-size:0.75rem; background:#030303; padding:0.75rem; border-radius:8px; font-family:var(--font-mono);"><code id="code-snippet-portal-link">http://localhost:4000/portal.html?key=web-app-key-2026</code></pre>
                         <button class="btn-primary" onclick="window.open(document.getElementById('code-snippet-portal-link').textContent, '_blank')" style="margin-top: 0.75rem; font-size: 0.78rem; padding: 6px 12px; font-weight: 700; border-radius: 6px; cursor: pointer;">🔗 Launch Live Shareable Portal Page</button>
                     </div>
+
+                    <div class="docs-card" style="margin-top: 1.5rem;">
+                        <h3 style="margin-bottom: 0.5rem;">🚀 Transitioning to Production (SaaS Integration)</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 0.75rem;">
+                            When you move FeedbackFlow from local development to your live production SaaS, the transition is completely seamless:
+                        </p>
+                        <ul style="padding-left: 1.25rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; margin-bottom: 0.5rem;">
+                            <li><strong>Dynamic Host Auto-Detection</strong>: The script <code>widget.js</code> automatically parses the domain it is loaded from (via <code>document.currentScript.src</code>). If you deploy the backend container to <code>https://feedback.rotemalt.com</code> and embed the script using that URL, the widget automatically routes all API requests (like upvotes, submissions, comments) to your production database—no hardcoded code edits required!</li>
+                            <li><strong>HTTPS Secured Sockets</strong>: Modern browsers require widgets embedded inside secured SaaS apps to load over HTTPS. Configure Nginx, Cloudflare SSL, or secure hosting parameters for your production port <code>4000</code>.</li>
+                            <li><strong>Persistent Volume</strong>: Map a persistent docker volume to <code>/usr/src/app/data</code> on your VPS or cloud container host to ensure your SQLite settings and cards are never lost during restarts.</li>
+                        </ul>
+                    </div>
                 </section>
 
                 <!-- Section 3: User Identification API -->
