@@ -9,10 +9,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/organization/feedbackflow/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-GNU%20AGPLv3-blue.svg?style=for-the-badge&logo=gnu&logoColor=white" alt="License" /></a>
-  <a href="https://github.com/organization/feedbackflow/blob/main/packages/widget/LICENSE"><img src="https://img.shields.io/badge/Widget%20License-MIT-emerald.svg?style=for-the-badge&logo=opensourceinitiative&logoColor=white" alt="Widget License" /></a>
-  <a href="https://hub.docker.com/r/feedbackflow/core"><img src="https://img.shields.io/badge/Docker%20Image-Verified-blue?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Verified" /></a>
-  <a href="https://discord.gg/feedbackflow"><img src="https://img.shields.io/badge/Discord-Join%20Community-indigo?style=for-the-badge&logo=discord&logoColor=white" alt="Discord" /></a>
+  <a href="https://github.com/rotemalt/feedbackflow/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-emerald.svg?style=for-the-badge&logo=opensourceinitiative&logoColor=white" alt="License" /></a>
+  <a href="https://github.com/rotemalt/feedbackflow/blob/main/docker-compose.yml"><img src="https://img.shields.io/badge/Docker%20Image-Verified-blue?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Verified" /></a>
+  <a href="https://github.com/rotemalt/feedbackflow"><img src="https://img.shields.io/github/stars/rotemalt/feedbackflow?style=for-the-badge&color=gold" alt="GitHub Stars" /></a>
 </p>
 
 <p align="center">
@@ -233,14 +232,14 @@ Deploy the Docker Compose container or the simple Node script to a cloud contain
 
 ## 🤝 Community & Contributions
 
-We are committed to open-core principles:
-1. **Core Admin & Server (`server.js`, `database.js`)**: GNU AGPLv3.
-2. **Client Widget Bundle (`public/widget.js`, `public/widget.css`)**: MIT License (Highly permissive, copy into closed-source apps!).
+We are committed to open-source principles:
+
+*   **License**: The entire platform (including the Express server, DB engine, and widget bundle) is licensed under the highly permissive **MIT License**. You can copy, modify, distribute, and use it freely—even within closed-source commercial applications!
 
 We love contributions!
 ```bash
 # Clone the repository
-git clone https://github.com/organization/feedbackflow.git
+git clone https://github.com/rotemalt/feedbackflow.git
 
 # Install zero-bloat dependencies
 npm install
