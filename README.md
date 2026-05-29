@@ -45,7 +45,8 @@ Most modern open-source SaaS platforms are plagued by dependency bloat, requirin
 | **Privacy & GDPR** | Complete ownership (Your DB) | Third-party server cookies | Third-party server tracking |
 | **Widget Isolation** | **Shadow-DOM Isolated** | Standard iframe / Script bleed | Heavy external redirects |
 | **AI Triaging** | Built-in Gemini Triaging Agents | Expensive AI add-on | Team-triage only |
-| **Database** | Lightweight SQLite (Zero Setup) | Locked proprietary DB | Locked proprietary DB |
+| **Database** | **Dual Engine: SQLite (Local) & PostgreSQL (Cloud)** | Locked proprietary DB | Locked proprietary DB |
+| **Multi-Tenancy** | **Multi-Org Isolation & RBAC Roles** | Basic team shares | Enterprise SSO / expensive seat licensing |
 | **Extensibility** | Full REST APIs & Webhooks | Proprietary integrations | Enterprise plan API locks |
 
 ---
@@ -67,14 +68,16 @@ graph TD
 
     subgraph FeedbackCore["FeedbackFlow Engine (Self-Hosted Port 4000)"]
         Express["Express.js Server (server.js)"]
-        SQLite["SQLite3 Relational DB (database.db)"]
+        DBAbstract["Abstract Database Client (database.js)"]
+        SQLDb[("SQLite / PostgreSQL Database")]
         Gemini["Gemini AI Clarification Agent"]
         GitHubSync["GitHub Hook Issues Dispatcher"]
         
         WidgetShadow -->|API Queries / Feedbacks| Express
-        Express <-->|Relational Queries| SQLite
+        Express <-->|Relational Queries| DBAbstract
+        DBAbstract <-->|Switchable Connection| SQLDb
         Express -->|Trigger Triaging| Gemini
-        Gemini -->|Inject Auto-Clarifications| SQLite
+        Gemini -->|Inject Auto-Clarifications| DBAbstract
         Express -->|Webhook Triggers| GitHubSync
     end
 
@@ -89,7 +92,10 @@ graph TD
 
 ## 🌟 Elite Core Features
 
-*   **⚡ Zero-Bleed Customer Widget**: Embed a multi-view feedback widget (Board, Request Submission, Release Roadmap) that works perfectly on React, Next.js, Vue, Svelte, or plain HTML.
+*   **⚡ Zero-Bleed Customer Widget**: Embed a multi-view feedback board (Board, Request Submission, Release Roadmap) that works perfectly on React, Next.js, Vue, Svelte, or plain HTML.
+*   **🗄️ Dual-Engine Abstract Client**: Transparent connection pooling for SQLite (local file) and PostgreSQL (managed cloud Neon/Supabase/AWS) with automatic SQL dialect translation and positional argument mapping.
+*   **🛡️ Multi-Tenant Organizations & RBAC**: Isolate data safely across distinct corporate organizations, with role-based controllers (`owner`, `admin`, `member`) preventing cross-tenant access.
+*   **🌱 Self-Healing Programmatic Migrations**: Schema validation checks automatically on server boot, performing programmatic database column upgrades (`ALTER TABLE`) with zero operational maintenance.
 *   **🤖 Integrated Gemini AI Agents**: When a user submits a feature request, our AI agent scans the text. If it is too short or vague, it automatically replies in a threaded comment as an AI Assistant, asking clarifying questions. It also triages the submission into categories (**Bug**, **Feature**, **Improvement**).
 *   **🔐 User Identification API**: Prefill and hide contact forms automatically if the customer is already signed into your SaaS by configuring simple global window states.
 *   **🎨 Dynamic Customizer**: Visual color picker, title updater, and layout position editor with real-time mockup compiling and script distribution.
@@ -121,6 +127,7 @@ services:
     environment:
       - PORT=4000
       - NODE_ENV=production
+      - DATABASE_URL=postgres://db_user:db_pass@postgres-db:5432/feedbackflow  # Optional: Swaps SQLite to PostgreSQL
       - JWT_SECRET=change-this-to-a-secure-uuid-string-in-production
       - GEMINI_API_KEY=YOUR_OPTIONAL_GOOGLE_GEMINI_KEY
     command: sh -c "npm install && npm start"
@@ -148,6 +155,7 @@ Customize FeedbackFlow by editing your environment variables:
 | :--- | :--- | :--- | :--- |
 | `PORT` | System | Network port the Express server binds to | `4000` |
 | `NODE_ENV` | Mode | Development or Production context | `production` |
+| `DATABASE_URL` | Database | PostgreSQL connection string. If omitted, falls back to local SQLite database. | *(SQLite fallback)* |
 | `JWT_SECRET` | Security | Encryption signature key for session JWTs | `super-secret-...` |
 | `GEMINI_API_KEY` | [Optional] | Google API Key to enable AI Auto-Triaging | *(Disabled)* |
 
@@ -166,11 +174,15 @@ FeedbackFlow exposes high-performance JSON REST endpoints:
 *   `POST /api/feedback/:id/comments`: Add a comment thread post.
 
 ### Protected Admin Endpoints (Requires `Authorization: Bearer <JWT_TOKEN>`)
-*   `GET /api/projects`: List projects.
-*   `POST /api/projects`: Create a project.
-*   `PUT /api/projects/:id/theme`: Update branding parameters.
+*   `GET /api/projects`: List projects (scoped to your organization).
+*   `POST /api/projects`: Create a project workspace (requires `owner` or `admin`).
+*   `PUT /api/projects/:id/theme`: Update branding parameters (requires `owner` or `admin`).
 *   `PUT /api/feedback/:id/status`: Update roadmap status. Triggers GitHub Webhooks.
-*   `GET /api/analytics`: Aggregate relational metrics and monthly counts.
+*   `GET /api/analytics`: Aggregate relational organization metrics.
+*   `GET /api/organization/details`: Fetch active workspace billing details.
+*   `GET /api/organization/members`: List administrative team members.
+*   `POST /api/organization/invite`: Create/invite a new administrator teammate (requires `owner` or `admin`).
+*   `DELETE /api/organization/members/:id`: Revoke access and remove a team member (requires `owner` strictly).
 
 ---
 
