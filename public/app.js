@@ -23,6 +23,8 @@ class FeedbackApp {
         this.initDOM();
         this.bindEvents();
         
+        window.FeedbackFlowAppInstance = this;
+
         // Bootstrapping: Silently verify credentials and fetch starting workspaces
         this.checkAuth();
     }
@@ -67,6 +69,27 @@ class FeedbackApp {
         document.getElementById('landing-view').classList.remove('active');
         document.getElementById('app-view').classList.add('active');
         
+        // Fetch detailed profile credentials
+        try {
+            const profileRes = await fetch('/api/verify', {
+                headers: { 'Authorization': `Bearer ${this.token}` }
+            });
+            if (profileRes.ok) {
+                const data = await profileRes.json();
+                this.currentUser = data.user;
+                
+                // Update Sidebar Profile Badge
+                const avatarEl = document.querySelector('.user-avatar');
+                const nameEl = document.querySelector('.user-name');
+                const roleEl = document.querySelector('.user-role');
+                if (avatarEl) avatarEl.textContent = this.currentUser.username.substring(0, 1).toUpperCase();
+                if (nameEl) nameEl.textContent = this.currentUser.username;
+                if (roleEl) roleEl.textContent = this.currentUser.role.toUpperCase();
+            }
+        } catch (e) {
+            console.error("Failed loading user profile validation", e);
+        }
+
         // Initialize modular components after login
         this.projectManager = new ProjectManager(this);
         this.toolbar = new FeedbackToolbar(this);
@@ -199,7 +222,8 @@ class FeedbackApp {
             'analytics-board': document.getElementById('analytics-board'),
             'feedback-board': document.getElementById('feedback-board'),
             'roadmap-board': document.getElementById('roadmap-board'),
-            'customizer-board': document.getElementById('customizer-board')
+            'customizer-board': document.getElementById('customizer-board'),
+            'team-board': document.getElementById('team-board')
         };
     }
 
@@ -248,6 +272,12 @@ class FeedbackApp {
 
         document.getElementById('btn-logout').addEventListener('click', () => this.logout());
 
+        // Team invite form
+        const formInvite = document.getElementById('form-invite-member');
+        if (formInvite) {
+            formInvite.addEventListener('submit', (e) => this.inviteTeamMember(e));
+        }
+
         // Navigation tab selections
         this.navBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -273,6 +303,8 @@ class FeedbackApp {
             // Refresh data context based on pane selected
             if (paneId === 'analytics-board') {
                 this.fetchAnalyticsData();
+            } else if (paneId === 'team-board') {
+                this.fetchTeamRoster();
             } else {
                 this.fetchFeedbackData();
             }
@@ -940,6 +972,129 @@ class AnalyticsDashboard {
                 </tr>
             `;
         }).join('');
+    }
+
+    async fetchTeamRoster() {
+        try {
+            // A. Fetch Organization Details
+            const orgRes = await fetch('/api/organization/details', {
+                headers: { 'Authorization': `Bearer ${this.token}` }
+            });
+            if (orgRes.ok) {
+                const org = await orgRes.json();
+                const badge = document.getElementById('org-billing-badge');
+                if (badge) {
+                    badge.innerHTML = `
+                        <span style="width: 8px; height: 8px; border-radius: 50%; background: #6366f1; display: inline-block;"></span>
+                        ${org.name} (${org.billing_tier.toUpperCase()})
+                    `;
+                }
+            }
+
+            // B. Fetch Members Roster
+            const membersRes = await fetch('/api/organization/members', {
+                headers: { 'Authorization': `Bearer ${this.token}` }
+            });
+            if (membersRes.ok) {
+                const members = await membersRes.json();
+                this.renderTeamRoster(members);
+            }
+        } catch (e) {
+            console.error("Failed fetching team roster", e);
+        }
+    }
+
+    renderTeamRoster(members) {
+        const mount = document.getElementById('team-roster-mount');
+        if (!mount) return;
+
+        if (members.length === 0) {
+            mount.innerHTML = `<tr><td colspan="4" style="padding: 2rem; text-align: center; color: var(--text-muted);">No team members found.</td></tr>`;
+            return;
+        }
+
+        const isOwner = this.currentUser?.role === 'owner';
+
+        mount.innerHTML = members.map(member => {
+            const isSelf = this.currentUser?.id === member.id;
+            const removeBtn = (isOwner && !isSelf) 
+                ? `<button class="btn-secondary" onclick="window.FeedbackFlowAppInstance.removeTeamMember(${member.id})" style="padding: 4px 8px; font-size: 0.75rem; border-color: rgba(248,113,113,0.3); color: #f87171; background: rgba(248,113,113,0.05); border-radius: 4px; cursor: pointer;">Remove</button>`
+                : `<span style="color: var(--text-muted); font-size: 0.75rem;">None</span>`;
+
+            const roleBadgeClass = member.role === 'owner' ? ' planned' : (member.role === 'admin' ? ' feature' : ' done');
+            const roleBadgeLabel = member.role.toUpperCase();
+
+            return `
+                <tr style="border-bottom: 1px solid var(--border-subtle); color: var(--text-primary);">
+                    <td style="padding: 12px 8px; font-weight: 600;">
+                        ${this.escapeHTML(member.username)} ${isSelf ? ' <span style="font-size: 0.7rem; color: var(--accent);">(You)</span>' : ''}
+                    </td>
+                    <td style="padding: 12px 8px; color: var(--text-secondary);">${this.escapeHTML(member.email || 'N/A')}</td>
+                    <td style="padding: 12px 8px;">
+                        <span class="ff-cat-tag ${roleBadgeClass}" style="font-size: 0.65rem; border-radius: 4px; padding: 2px 6px;">${roleBadgeLabel}</span>
+                    </td>
+                    <td style="padding: 12px 8px; text-align: right;">${removeBtn}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    async inviteTeamMember(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('invite-username').value;
+        const email = document.getElementById('invite-email').value;
+        const password = document.getElementById('invite-password').value;
+        const role = document.getElementById('invite-role').value;
+        
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.textContent = 'Sending Invitation...';
+        submitBtn.disabled = true;
+
+        try {
+            const res = await fetch('/api/organization/invite', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.token}`
+                },
+                body: JSON.stringify({ username, password, email, role })
+            });
+
+            if (res.ok) {
+                e.target.reset();
+                this.fetchTeamRoster();
+            } else {
+                const data = await res.json();
+                alert(`Invite Failed: ${data.error || 'Unknown error'}`);
+            }
+        } catch (e) {
+            console.error("Invite Member Error:", e);
+        } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    }
+
+    async removeTeamMember(id) {
+        if (!confirm("Are you absolutely sure you want to remove this team member from the organization?")) return;
+
+        try {
+            const res = await fetch(`/api/organization/members/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${this.token}` }
+            });
+
+            if (res.ok) {
+                this.fetchTeamRoster();
+            } else {
+                const data = await res.json();
+                alert(`Removal Failed: ${data.error || 'Unknown error'}`);
+            }
+        } catch (e) {
+            console.error("Remove Member Error:", e);
+        }
     }
 }
 

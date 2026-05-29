@@ -6,23 +6,32 @@ const { db, hashPassword, verifyPassword } = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
-const JWT_SECRET = 'super-secret-key-for-feedbackflow-2026';
+const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-for-feedbackflow-2026';
 
 app.use(cors()); // Allow widgets to be embedded anywhere
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // --- Middleware ---
+
+// Hardened Token Auth with DB Role/Org Verification
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     
     if (token == null) return res.status(401).json({ error: 'Unauthorized' });
 
-    jwt.verify(token, JWT_SECRET, (err, user) => {
+    jwt.verify(token, JWT_SECRET, (err, payload) => {
         if (err) return res.status(403).json({ error: 'Forbidden' });
-        req.user = user;
-        next();
+        
+        // Fetch detailed user account details from db to verify role/org status
+        db.get('SELECT id, username, organization_id, role, email FROM admin_users WHERE id = ?', [payload.id], (dbErr, row) => {
+            if (dbErr || !row) {
+                return res.status(401).json({ error: 'Unauthorized account session' });
+            }
+            req.user = row;
+            next();
+        });
     });
 }
 
@@ -34,16 +43,32 @@ function optionalAuthenticateToken(req, res, next) {
         req.user = null;
         return next();
     }
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) req.user = null;
-        else req.user = user;
-        next();
+    jwt.verify(token, JWT_SECRET, (err, payload) => {
+        if (err) {
+            req.user = null;
+            return next();
+        }
+        db.get('SELECT id, username, organization_id, role, email FROM admin_users WHERE id = ?', [payload.id], (dbErr, row) => {
+            if (dbErr || !row) req.user = null;
+            else req.user = row;
+            next();
+        });
     });
 }
 
-// --- Auth & Sign Up Endpoints ---
+// Role-Based Access Control (RBAC) Route Locker
+function requireRole(allowedRoles) {
+    return (req, res, next) => {
+        if (!req.user || !allowedRoles.includes(req.user.role)) {
+            return res.status(403).json({ error: 'Forbidden: Insufficient role permissions' });
+        }
+        next();
+    };
+}
 
-// 1. Secured Login using PBKDF2 Hashing verification
+// --- Auth & Multi-Tenant Organization Bootstrapping ---
+
+// 1. Secured Login using Cryptographic pbkdf2 Hashing verification
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
     db.get('SELECT * FROM admin_users WHERE username = ?', [username], (err, row) => {
@@ -51,7 +76,6 @@ app.post('/api/login', (req, res) => {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
         
-        // Cryptographic hash verification
         const valid = verifyPassword(password, row.password);
         if (!valid) {
             return res.status(401).json({ error: 'Invalid credentials' });
@@ -62,47 +86,141 @@ app.post('/api/login', (req, res) => {
     });
 });
 
-// 2. Secured Signup for Multi-Tenant Organization Workspace admins
+// 2. Secured Organization Multi-Tenant Signup
 app.post('/api/register', (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, company_name } = req.body;
     if (!username || !password) {
         return res.status(400).json({ error: 'Username and password required' });
     }
 
-    const hashed = hashPassword(password);
-    db.run(
-        'INSERT INTO admin_users (username, password) VALUES (?, ?)',
-        [username, hashed],
-        function(err) {
-            if (err) {
-                if (err.message.includes('UNIQUE')) {
-                    return res.status(400).json({ error: 'Username already registered' });
-                }
-                return res.status(500).json({ error: err.message });
-            }
-            
-            const token = jwt.sign({ username, id: this.lastID }, JWT_SECRET, { expiresIn: '24h' });
-            res.status(201).json({ success: true, token, username });
+    const orgName = company_name || `${username}'s Workspace`;
+    
+    // Create new organization
+    db.run("INSERT INTO organizations (name, billing_tier) VALUES (?, ?)", [orgName, 'free'], function(oErr) {
+        if (oErr) {
+            return res.status(500).json({ error: oErr.message });
         }
-    );
+        
+        const orgId = this.lastID;
+        const hashed = hashPassword(password);
+        
+        // Create root admin account with 'owner' role
+        db.run(
+            'INSERT INTO admin_users (organization_id, username, password, role, email) VALUES (?, ?, ?, ?, ?)',
+            [orgId, username, hashed, 'owner', `${username}@example.com`],
+            function(aErr) {
+                if (aErr) {
+                    if (aErr.message.includes('UNIQUE')) {
+                        return res.status(400).json({ error: 'Username already registered' });
+                    }
+                    return res.status(500).json({ error: aErr.message });
+                }
+                
+                const userId = this.lastID;
+                const apiKey = 'apiKey-' + Math.random().toString(36).substr(2, 9) + '-' + Date.now().toString(36);
+                
+                // Auto-bootstrap a first project board workspace
+                db.run(
+                    `INSERT INTO projects (organization_id, name, api_key, theme_color, button_position, welcome_title) VALUES (?, ?, ?, ?, ?, ?)`,
+                    [orgId, 'First Workspace', apiKey, '#6366f1', 'right', 'Feature Requests'],
+                    function(pErr) {
+                        if (pErr) console.error("Failed auto-bootstrapping default workspace project:", pErr);
+                        
+                        const token = jwt.sign({ username, id: userId }, JWT_SECRET, { expiresIn: '24h' });
+                        res.status(201).json({ success: true, token, username, org_name: orgName });
+                    }
+                );
+            }
+        );
+    });
 });
 
 app.get('/api/verify', authenticateToken, (req, res) => {
     res.json({ success: true, user: req.user });
 });
 
-// --- Projects API Endpoints (Protected Admin) ---
+// --- Enterprise Organization & Roster API Endpoints [NEW] ---
 
-app.get('/api/projects', authenticateToken, (req, res) => {
-    db.all("SELECT * FROM projects ORDER BY name ASC", [], (err, rows) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
+app.get('/api/organization/details', authenticateToken, (req, res) => {
+    db.get("SELECT * FROM organizations WHERE id = ?", [req.user.organization_id], (err, row) => {
+        if (err || !row) {
+            return res.status(404).json({ error: 'Organization data not found' });
         }
-        res.json(rows);
+        res.json(row);
     });
 });
 
-app.post('/api/projects', authenticateToken, (req, res) => {
+app.get('/api/organization/members', authenticateToken, (req, res) => {
+    db.all(
+        "SELECT id, username, role, email FROM admin_users WHERE organization_id = ? ORDER BY id ASC", 
+        [req.user.organization_id], 
+        (err, rows) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json(rows);
+        }
+    );
+});
+
+app.post('/api/organization/invite', authenticateToken, requireRole(['owner', 'admin']), (req, res) => {
+    const { username, password, email, role } = req.body;
+    if (!username || !password || !email || !role) {
+        return res.status(400).json({ error: 'All fields (username, password, email, role) are required' });
+    }
+
+    const allowedRoles = ['admin', 'member'];
+    if (!allowedRoles.includes(role)) {
+        return res.status(400).json({ error: 'Invalid user role selected' });
+    }
+
+    const hashed = hashPassword(password);
+    db.run(
+        "INSERT INTO admin_users (organization_id, username, password, role, email) VALUES (?, ?, ?, ?, ?)",
+        [req.user.organization_id, username, hashed, role, email],
+        function(err) {
+            if (err) {
+                if (err.message.includes('UNIQUE')) {
+                    return res.status(400).json({ error: 'Username already exists' });
+                }
+                return res.status(500).json({ error: err.message });
+            }
+            res.status(201).json({
+                id: this.lastID,
+                username,
+                role,
+                email
+            });
+        }
+    );
+});
+
+app.delete('/api/organization/members/:id', authenticateToken, requireRole(['owner']), (req, res) => {
+    const { id } = req.params;
+    
+    // Prevent owners from deleting themselves
+    if (parseInt(id) === req.user.id) {
+        return res.status(400).json({ error: 'Owners cannot delete themselves from the roster' });
+    }
+
+    db.run("DELETE FROM admin_users WHERE id = ? AND organization_id = ?", [id, req.user.organization_id], function(err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ success: true, message: 'Teammate removed successfully' });
+    });
+});
+
+// --- Projects API Endpoints (Organization-Scoped) ---
+
+app.get('/api/projects', authenticateToken, (req, res) => {
+    db.all(
+        "SELECT * FROM projects WHERE organization_id = ? ORDER BY name ASC", 
+        [req.user.organization_id], 
+        (err, rows) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json(rows);
+        }
+    );
+});
+
+app.post('/api/projects', authenticateToken, requireRole(['owner', 'admin']), (req, res) => {
     const { name } = req.body;
     if (!name) {
         return res.status(400).json({ error: 'Project name is required' });
@@ -111,14 +229,15 @@ app.post('/api/projects', authenticateToken, (req, res) => {
     const apiKey = 'apiKey-' + Math.random().toString(36).substr(2, 9) + '-' + Date.now().toString(36);
     
     db.run(
-        `INSERT INTO projects (name, api_key, theme_color, button_position, welcome_title) VALUES (?, ?, ?, ?, ?)`,
-        [name, apiKey, '#6366f1', 'right', 'Feature Requests'],
+        `INSERT INTO projects (organization_id, name, api_key, theme_color, button_position, welcome_title) VALUES (?, ?, ?, ?, ?, ?)`,
+        [req.user.organization_id, name, apiKey, '#6366f1', 'right', 'Feature Requests'],
         function(err) {
             if (err) {
                 return res.status(500).json({ error: err.message });
             }
             res.status(201).json({
                 id: this.lastID,
+                organization_id: req.user.organization_id,
                 name,
                 api_key: apiKey,
                 theme_color: '#6366f1',
@@ -129,13 +248,13 @@ app.post('/api/projects', authenticateToken, (req, res) => {
     );
 });
 
-app.put('/api/projects/:id/theme', authenticateToken, (req, res) => {
+app.put('/api/projects/:id/theme', authenticateToken, requireRole(['owner', 'admin']), (req, res) => {
     const { id } = req.params;
     const { theme_color, button_position, welcome_title } = req.body;
     
     db.run(
-        `UPDATE projects SET theme_color = ?, button_position = ?, welcome_title = ? WHERE id = ?`,
-        [theme_color || '#6366f1', button_position || 'right', welcome_title || 'Feature Requests', id],
+        `UPDATE projects SET theme_color = ?, button_position = ?, welcome_title = ? WHERE id = ? AND organization_id = ?`,
+        [theme_color || '#6366f1', button_position || 'right', welcome_title || 'Feature Requests', id, req.user.organization_id],
         function(err) {
             if (err) {
                 return res.status(500).json({ error: err.message });
@@ -145,9 +264,9 @@ app.put('/api/projects/:id/theme', authenticateToken, (req, res) => {
     );
 });
 
-app.delete('/api/projects/:id', authenticateToken, (req, res) => {
+app.delete('/api/projects/:id', authenticateToken, requireRole(['owner']), (req, res) => {
     const { id } = req.params;
-    db.run("DELETE FROM projects WHERE id = ?", [id], function(err) {
+    db.run("DELETE FROM projects WHERE id = ? AND organization_id = ?", [id, req.user.organization_id], function(err) {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
@@ -173,7 +292,7 @@ app.get('/api/widget-config', (req, res) => {
 });
 
 
-// --- Feedback API Endpoints (Public & Admin) ---
+// --- Feedback API Endpoints (Public & Admin Scoped) ---
 
 app.get('/api/feedback', (req, res) => {
     const { projectId } = req.query;
@@ -196,7 +315,6 @@ app.get('/api/feedback', (req, res) => {
     });
 });
 
-// Expanded POST API with built-in Agentic AI categorization and replies
 app.post('/api/feedback', async (req, res) => {
     const { project_id, title, description, category, user_email, user_name } = req.body;
     
@@ -249,11 +367,9 @@ Respond only in strict JSON format:
         }
     }
 
-    // Heuristic Fallback Agent (if API key missing or failed)
+    // Heuristic Fallback Agent
     if (!geminiKey || !autoReplyComment) {
         const fullText = (title + ' ' + description).toLowerCase();
-        
-        // 1. Category Heuristics
         if (/\b(crash|bug|error|broken|fail|issue|not working|broke|patch)\b/.test(fullText)) {
             finalCategory = 'bug';
         } else if (/\b(better|improve|cleaner|faster|slow|speed|ui|ux|design|aesthetic|adjust|align)\b/.test(fullText)) {
@@ -262,7 +378,6 @@ Respond only in strict JSON format:
             finalCategory = 'feature';
         }
 
-        // 2. Vague Description Clarification Agent
         if (title.length + description.length < 35) {
             autoReplyComment = `Hi there! Thanks for writing in. To help our product and engineering team scope this out and resolve it quickly, could you please share a bit more detail, such as what browser you were using and what your expected outcome was? Thanks, FeedbackFlow AI Assistant.`;
         }
@@ -279,7 +394,6 @@ Respond only in strict JSON format:
             
             const feedbackId = this.lastID;
             
-            // If the AI agent generated a clarification reply, insert it into comments
             if (autoReplyComment) {
                 db.run(
                     "INSERT INTO comments (feedback_id, author_name, author_role, content) VALUES (?, ?, ?, ?)",
@@ -309,7 +423,6 @@ Respond only in strict JSON format:
 app.post('/api/feedback/:id/vote', (req, res) => {
     const { id } = req.params;
     const { action } = req.body;
-    
     const modifier = action === 'remove' ? '- 1' : '+ 1';
     
     db.run(`UPDATE feedback SET votes = votes ${modifier} WHERE id = ?`, [id], function(err) {
@@ -320,16 +433,21 @@ app.post('/api/feedback/:id/vote', (req, res) => {
     });
 });
 
-// --- Feedback API Endpoints (Protected Admin) ---
+
+// --- Scoped Feedback Admin Controllers ---
 
 // Hardened status change with GitHub Issue Hook Simulation
-app.put('/api/feedback/:id/status', authenticateToken, (req, res) => {
+app.put('/api/feedback/:id/status', authenticateToken, requireRole(['owner', 'admin']), (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
     
-    db.get("SELECT title, category FROM feedback WHERE id = ?", [id], (err, row) => {
+    // Security check: ensure feedback belongs to the authenticated user's organization!
+    db.get("SELECT f.title, f.category, p.organization_id FROM feedback f JOIN projects p ON f.project_id = p.id WHERE f.id = ?", [id], (err, row) => {
         if (err || !row) {
             return res.status(404).json({ error: 'Feedback not found' });
+        }
+        if (row.organization_id !== req.user.organization_id) {
+            return res.status(403).json({ error: 'Forbidden: Cross-organization workspace access denied' });
         }
         
         db.run(`UPDATE feedback SET status = ? WHERE id = ?`, [status, id], function(err) {
@@ -349,31 +467,40 @@ app.put('/api/feedback/:id/status', authenticateToken, (req, res) => {
                 console.log(`[GitHub Sync Hook] Pushing webhook trigger to API: https://api.github.com/repos/organization/project/issues...`);
                 console.log(`[GitHub Sync Hook] Payload:`, payload);
 
-                // Insert a system comment in the thread notifying users that this is linked to GitHub development!
                 const syncMsg = `System: This feature request has been synchronized with the developer team on GitHub. Sync Issue #${Math.floor(Math.random() * 800) + 100} has been linked.`;
                 db.run(
                     "INSERT INTO comments (feedback_id, author_name, author_role, content) VALUES (?, ?, ?, ?)",
                     [id, 'Developer Tools', 'admin', syncMsg]
                 );
             }
-            // --- END GITHUB INTEGRATION MOCK ---
 
             res.json({ success: true, id, status });
         });
     });
 });
 
-app.delete('/api/feedback/:id', authenticateToken, (req, res) => {
+app.delete('/api/feedback/:id', authenticateToken, requireRole(['owner', 'admin']), (req, res) => {
     const { id } = req.params;
-    db.run("DELETE FROM feedback WHERE id = ?", [id], function(err) {
-        if (err) {
-            return res.status(500).json({ error: err.message });
+    
+    // Security check: ensure feedback belongs to the authenticated user's organization!
+    db.get("SELECT p.organization_id FROM feedback f JOIN projects p ON f.project_id = p.id WHERE f.id = ?", [id], (err, row) => {
+        if (err || !row) {
+            return res.status(404).json({ error: 'Feedback not found' });
         }
-        res.json({ success: true, message: 'Feedback deleted successfully' });
+        if (row.organization_id !== req.user.organization_id) {
+            return res.status(403).json({ error: 'Forbidden: Cross-organization workspace access denied' });
+        }
+
+        db.run("DELETE FROM feedback WHERE id = ?", [id], function(err) {
+            if (err) {
+                return res.status(500).json({ error: err.message });
+            }
+            res.json({ success: true, message: 'Feedback deleted successfully' });
+        });
     });
 });
 
-// --- Commenting API Endpoints (Public & Admin) ---
+// --- Commenting API Endpoints (Scoped) ---
 
 app.get('/api/feedback/:id/comments', (req, res) => {
     const { id } = req.params;
@@ -397,7 +524,7 @@ app.post('/api/feedback/:id/comments', optionalAuthenticateToken, (req, res) => 
     let role = 'user';
     
     if (req.user) {
-        name = req.user.username === 'admin' ? 'Product Manager' : req.user.username;
+        name = req.user.role === 'owner' ? 'Product Owner' : (req.user.username === 'admin' ? 'Product Manager' : req.user.username);
         role = 'admin';
     }
     
@@ -420,30 +547,32 @@ app.post('/api/feedback/:id/comments', optionalAuthenticateToken, (req, res) => 
     );
 });
 
-// --- Rich Analytics API (Protected Admin) ---
+// --- Scoped Rich Analytics API ---
 
 app.get('/api/analytics', authenticateToken, (req, res) => {
     const stats = {};
+    const orgId = req.user.organization_id;
     
-    db.get("SELECT COUNT(*) as total FROM projects", (err, row) => {
+    db.get("SELECT COUNT(*) as total FROM projects WHERE organization_id = ?", [orgId], (err, row) => {
         stats.total_projects = row ? row.total : 0;
         
-        db.get("SELECT COUNT(*) as total, SUM(votes) as votes FROM feedback", (err, row) => {
+        db.get("SELECT COUNT(*) as total, SUM(f.votes) as votes FROM feedback f JOIN projects p ON f.project_id = p.id WHERE p.organization_id = ?", [orgId], (err, row) => {
             stats.total_feedback = row ? row.total : 0;
             stats.total_votes = row && row.votes ? row.votes : 0;
             
-            db.all("SELECT category, COUNT(*) as count FROM feedback GROUP BY category", (err, rows) => {
+            db.all("SELECT f.category, COUNT(*) as count FROM feedback f JOIN projects p ON f.project_id = p.id WHERE p.organization_id = ? GROUP BY f.category", [orgId], (err, rows) => {
                 stats.categories = rows || [];
                 
-                db.all("SELECT status, COUNT(*) as count FROM feedback GROUP BY status", (err, rows) => {
+                db.all("SELECT f.status, COUNT(*) as count FROM feedback f JOIN projects p ON f.project_id = p.id WHERE p.organization_id = ? GROUP BY f.status", [orgId], (err, rows) => {
                     stats.statuses = rows || [];
                     
                     db.all(`
                         SELECT p.name as project_name, COUNT(f.id) as feedback_count, SUM(f.votes) as vote_count 
                         FROM projects p 
                         LEFT JOIN feedback f ON p.id = f.project_id 
-                        GROUP BY p.id
-                    `, (err, rows) => {
+                        WHERE p.organization_id = ?
+                        GROUP BY p.id, p.name
+                    `, [orgId], (err, rows) => {
                         stats.projects_breakdown = rows || [];
                         res.json(stats);
                     });
