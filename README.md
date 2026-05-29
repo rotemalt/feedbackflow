@@ -241,11 +241,17 @@ We love contributions!
 # Clone the repository
 git clone https://github.com/rotemalt/feedbackflow.git
 
+# Navigate into the project directory
+cd feedbackflow
+
 # Install zero-bloat dependencies
 npm install
 
-# Run the local server
+# Run the local server (defaults to port 4000)
 npm start
+
+# Or run on a custom port if 4000 is occupied:
+PORT=4001 npm start
 ```
 
 *Join the COSS feedback movement! Fork, submit a PR, and give us a ⭐ on GitHub!*
